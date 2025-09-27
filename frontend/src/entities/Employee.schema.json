@@ -1,0 +1,50 @@
+{
+    "name": "Employee",
+    "type": "object",
+    "properties": {
+      "employee_id": {
+        "type": "string",
+        "description": "Unique employee identifier"
+      },
+      "name": {
+        "type": "string",
+        "description": "Full name of the employee"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "description": "Employee email address"
+      },
+      "position": {
+        "type": "string",
+        "description": "Job position/title"
+      },
+      "department": {
+        "type": "string",
+        "description": "Department name"
+      },
+      "base_salary": {
+        "type": "number",
+        "description": "Monthly base salary"
+      },
+      "hire_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date of hiring"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive"
+        ],
+        "default": "active",
+        "description": "Employee status"
+      }
+    },
+    "required": [
+      "employee_id",
+      "name",
+      "base_salary"
+    ]
+  }

@@ -1,0 +1,53 @@
+{
+    "name": "Attendance",
+    "type": "object",
+    "properties": {
+      "employee_id": {
+        "type": "string",
+        "description": "Reference to employee"
+      },
+      "date": {
+        "type": "string",
+        "format": "date",
+        "description": "Attendance date"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "present",
+          "absent",
+          "half_day"
+        ],
+        "description": "Attendance status"
+      },
+      "regular_hours": {
+        "type": "number",
+        "default": 0,
+        "description": "Regular working hours"
+      },
+      "overtime_hours": {
+        "type": "number",
+        "default": 0,
+        "description": "Overtime hours worked"
+      },
+      "is_holiday": {
+        "type": "boolean",
+        "default": false,
+        "description": "Whether this date was a company holiday"
+      },
+      "holiday_overtime_auto": {
+        "type": "number",
+        "default": 0,
+        "description": "Auto-calculated overtime for working on holidays"
+      },
+      "notes": {
+        "type": "string",
+        "description": "Additional notes"
+      }
+    },
+    "required": [
+      "employee_id",
+      "date",
+      "status"
+    ]
+  }

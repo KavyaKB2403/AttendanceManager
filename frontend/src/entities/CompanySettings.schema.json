@@ -1,0 +1,31 @@
+{
+    "name": "CompanySettings",
+    "type": "object",
+    "properties": {
+      "standard_work_hours": {
+        "type": "number",
+        "default": 8,
+        "description": "Standard working hours per day"
+      },
+      "working_days_per_month": {
+        "type": "number",
+        "default": 22,
+        "description": "Average working days per month"
+      },
+      "overtime_multiplier": {
+        "type": "number",
+        "default": 1.5,
+        "description": "Overtime pay multiplier"
+      },
+      "currency": {
+        "type": "string",
+        "default": "USD",
+        "description": "Currency symbol"
+      },
+      "company_name": {
+        "type": "string",
+        "description": "Company name"
+      }
+    },
+    "required": []
+  }
