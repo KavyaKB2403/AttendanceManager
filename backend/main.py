@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO) # Configure logging to show INFO level a
 
 app = FastAPI(title="Attendance & Salary API", version="0.1.0", redirect_slashes=False)
 
-app.mount("/static", StaticFiles(directory="/static"), name="static") # Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static") # Mount static files
 
 origins = [
     "http://localhost:3000",  # React frontend
