@@ -3,10 +3,10 @@ import logging # Import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles # Import StaticFiles
-from backend.db import Base, engine
+from .db import Base, engine
 # import models so SQLAlchemy sees them (models define Base subclasses)
-from backend.models import models  # noqa: F401
-from backend.routers import auth, employees, attendance, settings as settings_router, reports, admin # Import admin router
+from .models import models  # noqa: F401
+from .routers import auth, employees, attendance, settings as settings_router, reports, admin # Import admin router
 from dotenv import load_dotenv
 
 load_dotenv()
