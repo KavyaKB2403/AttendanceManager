@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr
 from datetime import date, datetime
 from typing import Optional, List, Literal
 from fastapi import UploadFile # Added for file uploads
-from backend.models.models import AttendanceStatus # Import AttendanceStatus
+from models.models import AttendanceStatus # Import AttendanceStatus
 
 # Auth
 class UserCreate(BaseModel):

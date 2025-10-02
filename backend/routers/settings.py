@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
-from backend.db import get_db
-from backend.models.models import Holiday, Settings
-from backend.schemas.schemas import HolidayCreate, HolidayOut, SettingsIn, SettingsOut
-from backend.routers.auth import get_current_user, require_admin, get_effective_user_id # Import get_effective_user_id
+from db import get_db
+from models.models import Holiday, Settings
+from schemas.schemas import HolidayCreate, HolidayOut, SettingsIn, SettingsOut
+from routers.auth import get_current_user, require_admin, get_effective_user_id # Import get_effective_user_id
 from typing import List, Optional
 from datetime import date, timedelta
 import logging # Import logging
 import os # Import os for file operations
 import shutil # Import shutil for file operations
 from pathlib import Path # Import Path
-from backend.models.models import User # Import User
+from models.models import User # Import User
 from starlette.requests import Request # Import Request
 
 router = APIRouter(prefix="/settings", tags=["settings"])

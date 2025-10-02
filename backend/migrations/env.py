@@ -28,7 +28,7 @@ project_root = os.path.abspath(os.path.join(current_dir, "..", "..")) # Adjust a
 sys.path.insert(0, project_root)
 
 # Correct import for your models
-from backend.models.models import Base # Import Base from your models
+from models.models import Base # Import Base from your models
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

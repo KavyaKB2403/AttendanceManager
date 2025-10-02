@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.db import get_db
-from backend.models.models import User, UserRole
-from backend.schemas.schemas import UserOut, StaffCreate, StaffCreatedOut # Import StaffCreatedOut
-from backend.routers.auth import require_admin, hash_password # require_admin for authz, hash_password for new users
+from db import get_db
+from models.models import User, UserRole
+from schemas.schemas import UserOut, StaffCreate, StaffCreatedOut # Import StaffCreatedOut
+from routers.auth import require_admin, hash_password # require_admin for authz, hash_password for new users
 from datetime import datetime, timedelta, timezone
 import secrets
 import logging

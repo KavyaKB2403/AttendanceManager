@@ -2,13 +2,13 @@ import enum
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import date, datetime
-from backend.db import get_db
-from backend.models.models import AttendanceRecord, Employee, Holiday, AttendanceStatus, Settings
-from backend.schemas.schemas import AttendanceCreate, AttendanceOut
-from backend.routers.auth import get_current_user, require_admin, get_effective_user_id # Import get_effective_user_id
+from db import get_db
+from models.models import AttendanceRecord, Employee, Holiday, AttendanceStatus, Settings
+from schemas.schemas import AttendanceCreate, AttendanceOut
+from routers.auth import get_current_user, require_admin, get_effective_user_id # Import get_effective_user_id
 from typing import List, Optional
 import logging
-from backend.models.models import User # Added missing import for User
+from models.models import User # Added missing import for User
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

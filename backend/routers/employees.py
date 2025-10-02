@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.db import get_db
-from backend.models.models import Employee, User
-from backend.schemas.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut
-from backend.routers.auth import get_current_user, require_admin, get_effective_user_id
+from db import get_db
+from models.models import Employee, User
+from schemas.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut
+from routers.auth import get_current_user, require_admin, get_effective_user_id
 from typing import List
 import logging
 

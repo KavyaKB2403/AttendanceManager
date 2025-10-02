@@ -17,10 +17,10 @@ from dotenv import load_dotenv
 
 load_dotenv() # Ensure .env is loaded in this router as well for debugging
 
-from backend.db import get_db
-from backend.models.models import User, PasswordReset, UserRole
-from backend.schemas.schemas import UserCreate, UserLogin, UserOut, EmailSchema, PasswordResetRequest
-from backend.utils.auth import hash_password, verify_password, create_token, verify_token
+from db import get_db
+from models.models import User, PasswordReset, UserRole
+from schemas.schemas import UserCreate, UserLogin, UserOut, EmailSchema, PasswordResetRequest
+from utils.auth import hash_password, verify_password, create_token, verify_token
 from typing import Optional, Tuple # Import Tuple
 
 router = APIRouter(prefix="/auth", tags=["auth"])

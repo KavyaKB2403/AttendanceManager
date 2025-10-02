@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, Response, Query
 from sqlalchemy.orm import Session
 from datetime import date, datetime
 from calendar import monthrange
-from backend.db import get_db
-from backend.models.models import Employee, AttendanceRecord, Settings
-from backend.schemas.schemas import SalaryRow
-from backend.routers.auth import get_current_user, get_effective_user_id # Import get_effective_user_id
+from db import get_db
+from models.models import Employee, AttendanceRecord, Settings
+from schemas.schemas import SalaryRow
+from routers.auth import get_current_user, get_effective_user_id # Import get_effective_user_id
 from typing import List, Optional
 import csv
 import io
