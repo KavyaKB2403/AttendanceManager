@@ -1,4 +1,5 @@
 import uvicorn
+import os
 import logging # Import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,21 +19,28 @@ app = FastAPI(title="Attendance & Salary API", version="0.1.0", redirect_slashes
 
 app.mount("/static", StaticFiles(directory="static"), name="static") # Mount static files
 
-origins = [
-    "http://localhost:3000",  # React frontend
-    "http://localhost:8000",  # FastAPI backend itself
-]
+# Get allowed origins from an environment variable
+# Example value: "https://your-vercel-app.vercel.app,http://localhost:3000"
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
+origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin]
+
+# If no origins are specified in the environment, default to localhost for development
+if not origins:
+    origins = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+    ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Create database tables (SQLite or configured DB) if they don't exist
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 # Routers
 app.include_router(auth.router)
