@@ -2,7 +2,7 @@
 import axios, { AxiosHeaders } from "axios";
 
 // Read from env (CRA-style) with fallback to local FastAPI default
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE = process.env.REACT_APP_API_BASE;
 console.log("API Base URL:", API_BASE);
 
 export const api = axios.create({
