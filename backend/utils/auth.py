@@ -1,18 +1,19 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt, JWTError
-from pwdlib import PasswordContext  # Changed from passlib
+from pwdlib import PasswordHash  # 1. This is the correct import
 import os
 
-# Create a context object for hashing using the new library
-pwd_context = PasswordContext(schemes=["bcrypt"])
+# 2. Create the context using the correct class
+# .recommended() will use bcrypt by default if it's installed.
+pwd_context = PasswordHash.recommended()
 
 # --- JWT Setup (This part is unchanged) ---
 JWT_SECRET = os.getenv("JWT_SECRET", "change_me_super_secret")
 JWT_ALG = os.getenv("JWT_ALG", "HS256")
 
 
-# --- Password Functions (These are updated) ---
+# --- Password Functions (These now use the correct context) ---
 def hash_password(pw: str) -> str:
     """Hashes a password using the pwd_context."""
     return pwd_context.hash(pw)
@@ -39,4 +40,3 @@ def verify_token(token: str) -> Optional[str]:
         return payload.get("sub")
     except JWTError:
         return None
-
