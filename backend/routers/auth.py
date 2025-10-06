@@ -1,5 +1,4 @@
-
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Response, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from datetime import datetime, timedelta, timezone # Import timezone
@@ -28,6 +27,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # ----------------------------
 # SIGN UP
 # ----------------------------
+@router.options("/signup")
+def signup_options():
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 @router.post("/signup", response_model=UserOut)
 def signup(payload: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == payload.email).first()
