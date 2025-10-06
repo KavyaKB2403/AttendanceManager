@@ -17,7 +17,6 @@ logging.basicConfig(level=logging.INFO) # Configure logging to show INFO level a
 
 app = FastAPI(title="Attendance & Salary API", version="0.1.0", redirect_slashes=False)
 
-app.mount("/static", StaticFiles(directory="static"), name="static") # Mount static files
 
 # Get allowed origins from an environment variable
 # Example value: "https://your-vercel-app.vercel.app,http://localhost:3000"
@@ -41,7 +40,7 @@ app.add_middleware(
 
 # Create database tables (SQLite or configured DB) if they don't exist
 # Base.metadata.create_all(bind=engine)
-
+app.mount("/static", StaticFiles(directory="static"), name="static") # Mount static files
 # Routers
 app.include_router(auth.router)
 app.include_router(employees.router)
