@@ -20,7 +20,7 @@ app = FastAPI(title="Attendance & Salary API", version="0.1.0", redirect_slashes
 
 # Get allowed origins from an environment variable
 # Example value: "https://your-vercel-app.vercel.app,http://localhost:3000"
-allowed_origins_str = os.getenv("BASE_URL", "")
+allowed_origins_str = os.getenv("CORS_ORIGINS", "")
 origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin]
 print("Origins:", origins)
 # If no origins are specified in the environment, default to localhost for development
