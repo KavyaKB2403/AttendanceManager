@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./lib/utils";
 import { useAuth } from "./auth/AuthContext"; // Import useAuth
-import { Helmet } from "react-helmet"; // Import Helmet
+import { Helmet } from "react-helmet-async"; // Import Helmet
 import {
   LayoutDashboard,
   Users,
