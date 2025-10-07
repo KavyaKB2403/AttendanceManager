@@ -84,7 +84,14 @@ function AppContent() { // Renamed App to AppContent
           path="/signin"
           element={
             <PublicOnlyRoute>
-              <SignInPage />
+              <Layout
+                currentPageName="Sign In - Attendance Manager"
+                onSignOut={handleSignOut}
+                theme={theme}
+                toggleTheme={toggleTheme}
+              >
+                <SignInPage />
+              </Layout>
             </PublicOnlyRoute>
           }
         />
@@ -92,7 +99,14 @@ function AppContent() { // Renamed App to AppContent
           path="/signup"
           element={
             <PublicOnlyRoute>
-              <SignUpPage />
+              <Layout
+                currentPageName="Sign Up - Attendance Manager"
+                onSignOut={handleSignOut}
+                theme={theme}
+                toggleTheme={toggleTheme}
+              >
+                <SignUpPage />
+              </Layout>
             </PublicOnlyRoute>
           }
         />
@@ -100,7 +114,14 @@ function AppContent() { // Renamed App to AppContent
           path="/forgot-password"
           element={
             <PublicOnlyRoute>
-              <ForgotPasswordPage />
+              <Layout
+                currentPageName="Forgot Password - Attendance Manager"
+                onSignOut={handleSignOut}
+                theme={theme}
+                toggleTheme={toggleTheme}
+              >
+                <ForgotPasswordPage />
+              </Layout>
             </PublicOnlyRoute>
           }
         />
@@ -108,7 +129,14 @@ function AppContent() { // Renamed App to AppContent
           path="/reset-password"
           element={
             <PublicOnlyRoute>
-              <ResetPasswordPage />
+              <Layout
+                currentPageName="Reset Password - Attendance Manager"
+                onSignOut={handleSignOut}
+                theme={theme}
+                toggleTheme={toggleTheme}
+              >
+                <ResetPasswordPage />
+              </Layout>
             </PublicOnlyRoute>
           }
         />
@@ -118,7 +146,7 @@ function AppContent() { // Renamed App to AppContent
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Layout currentPageName="Dashboard" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
+              <Layout currentPageName="Dashboard - Attendance Manager" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
                 <Dashboard onSignOut={handleSignOut} theme={theme} />
               </Layout>
             </ProtectedRoute>
@@ -128,7 +156,7 @@ function AppContent() { // Renamed App to AppContent
           path="/employees"
           element={
             <ProtectedRoute>
-              <Layout currentPageName="Employees" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
+              <Layout currentPageName="Employees - Attendance Manager" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
                 <Employees theme={theme} />
               </Layout>
             </ProtectedRoute>
@@ -138,7 +166,7 @@ function AppContent() { // Renamed App to AppContent
           path="/attendance"
           element={
             <ProtectedRoute>
-              <Layout currentPageName="Attendance" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
+              <Layout currentPageName="Attendance - Attendance Manager" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
                 <Attendance theme={theme} />
               </Layout>
             </ProtectedRoute>
@@ -148,7 +176,7 @@ function AppContent() { // Renamed App to AppContent
           path="/reports"
           element={
             <ProtectedRoute>
-              <Layout currentPageName="Reports" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
+              <Layout currentPageName="Reports - Attendance Manager" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
                 <Reports theme={theme} />
               </Layout>
             </ProtectedRoute>
@@ -158,7 +186,7 @@ function AppContent() { // Renamed App to AppContent
           path="/settings"
           element={
             <ProtectedRoute>
-              <Layout currentPageName="Settings" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
+              <Layout currentPageName="Settings - Attendance Manager" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
                 <Settings theme={theme} />
               </Layout>
             </ProtectedRoute>
@@ -170,9 +198,13 @@ function AppContent() { // Renamed App to AppContent
           path="*"
           element={
             isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
+              <Layout currentPageName="Dashboard - Attendance Manager" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
+                <Navigate to="/dashboard" replace />
+              </Layout>
             ) : (
-              <Navigate to="/signin" replace />
+              <Layout currentPageName="Sign In - Attendance Manager" onSignOut={handleSignOut} theme={theme} toggleTheme={toggleTheme}>
+                <Navigate to="/signin" replace />
+              </Layout>
             )
           }
         />

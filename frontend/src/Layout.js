@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./lib/utils";
 import { useAuth } from "./auth/AuthContext"; // Import useAuth
+import { Helmet } from "react-helmet"; // Import Helmet
 import {
   LayoutDashboard,
   Users,
@@ -72,6 +73,9 @@ export default function Layout({ children, currentPageName, onSignOut, theme, to
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-black">
+      <Helmet>
+        <title>{currentPageName ? `${currentPageName} | AttendanceManager` : "AttendanceManager"}</title>
+      </Helmet>
       {/* Top Navigation */}
       <nav className="bg-white/95 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50 dark:bg-gray-950/95 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
