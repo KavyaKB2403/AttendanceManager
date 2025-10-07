@@ -3,7 +3,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext"; // Import AuthProvider and useAuth
 import { Toaster } from 'react-hot-toast'; // Import Toaster
-
+import { Helmet, HelmetProvider } from "react-helmet-async"; // Import Helmet
 // Auth pages
 import SignInPage from "auth/sign-in/page";
 import SignUpPage from "auth/sign-up/page";
@@ -84,14 +84,10 @@ function AppContent() { // Renamed App to AppContent
           path="/signin"
           element={
             <PublicOnlyRoute>
-              <Layout
-                currentPageName="Sign In - Attendance Manager"
-                onSignOut={handleSignOut}
-                theme={theme}
-                toggleTheme={toggleTheme}
-              >
-                <SignInPage />
-              </Layout>
+              <Helmet>
+                <title>Sign In - Attendance Manager</title>
+              </Helmet>
+              <SignInPage />
             </PublicOnlyRoute>
           }
         />
@@ -99,14 +95,10 @@ function AppContent() { // Renamed App to AppContent
           path="/signup"
           element={
             <PublicOnlyRoute>
-              <Layout
-                currentPageName="Sign Up - Attendance Manager"
-                onSignOut={handleSignOut}
-                theme={theme}
-                toggleTheme={toggleTheme}
-              >
-                <SignUpPage />
-              </Layout>
+              <Helmet>
+                <title>Sign Up - Attendance Manager</title>
+              </Helmet>
+              <SignUpPage />
             </PublicOnlyRoute>
           }
         />
@@ -114,14 +106,10 @@ function AppContent() { // Renamed App to AppContent
           path="/forgot-password"
           element={
             <PublicOnlyRoute>
-              <Layout
-                currentPageName="Forgot Password - Attendance Manager"
-                onSignOut={handleSignOut}
-                theme={theme}
-                toggleTheme={toggleTheme}
-              >
-                <ForgotPasswordPage />
-              </Layout>
+              <Helmet>
+                <title>Forgot Password - Attendance Manager</title>
+              </Helmet>
+              <ForgotPasswordPage />
             </PublicOnlyRoute>
           }
         />
@@ -129,14 +117,10 @@ function AppContent() { // Renamed App to AppContent
           path="/reset-password"
           element={
             <PublicOnlyRoute>
-              <Layout
-                currentPageName="Reset Password - Attendance Manager"
-                onSignOut={handleSignOut}
-                theme={theme}
-                toggleTheme={toggleTheme}
-              >
-                <ResetPasswordPage />
-              </Layout>
+              <Helmet>
+                <title>Reset Password - Attendance Manager</title>
+              </Helmet>
+              <ResetPasswordPage />
             </PublicOnlyRoute>
           }
         />
@@ -216,7 +200,9 @@ function AppContent() { // Renamed App to AppContent
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <HelmetProvider>
+        <AppContent />
+      </HelmetProvider>
       <Toaster /> {/* Add Toaster here */}
     </AuthProvider>
   );
