@@ -6,6 +6,7 @@ from schemas.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut
 from routers.auth import get_current_user, require_admin, get_effective_user_id
 from typing import List
 import logging
+from datetime import datetime, date
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -49,12 +50,30 @@ def update_employee(emp_id: int, payload: EmployeeUpdate, db: Session = Depends(
     # Ensure the employee belongs to the effective user's data domain
     if not emp or emp.user_id != effective_user_id:
         raise HTTPException(status_code=404, detail="Employee not found or not associated with your data")
-    emp.name = payload.name
-    emp.monthly_salary = payload.monthly_salary
-    emp.date_of_joining = payload.date_of_joining
-    emp.bank_account = payload.bank_account # Renamed from email
-    emp.position = payload.position
-    emp.department = payload.department
+    if payload.name is not None:
+        emp.name = payload.name
+    if payload.monthly_salary is not None:
+        emp.monthly_salary = payload.monthly_salary
+    if payload.date_of_joining is not None:
+        emp.date_of_joining = payload.date_of_joining
+    if payload.bank_account is not None:
+        emp.bank_account = payload.bank_account # Renamed from email
+    if payload.position is not None:
+        emp.position = payload.position
+    if payload.department is not None:
+        emp.department = payload.department
+    if getattr(payload, "salary_effective_from", None) is not None:
+        emp.salary_effective_from = payload.salary_effective_from
+    if getattr(payload, "status", None) is not None:
+        # Track inactive_from when flipping to inactive
+        prev_status = emp.status
+        emp.status = payload.status
+        if payload.status == "inactive" and prev_status != "inactive" and emp.inactive_from is None:
+            emp.inactive_from = date.today()
+        if payload.status == "active":
+            emp.inactive_from = None
+    emp.last_updated_by = current_admin_user.id
+    emp.last_updated_at = datetime.utcnow()
     db.commit(); db.refresh(emp); return emp
 
 @router.delete("/{emp_id}")

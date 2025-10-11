@@ -1,59 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "components/ui/button";
 import { Input } from "components/ui/input";
 import { Label } from "components/ui/label";
 import { Upload, XCircle } from "lucide-react";
-import { toast } from "react-hot-toast";
-import { settingsService } from "../../lib/settings"; // Import settingsService
 
-export default function CompanyLogoUploader({ currentLogoUrl, onLogoUploadSuccess }) {
+// This component now only handles file selection and preview.
+// It passes the selected file up to its parent component.
+export default function CompanyLogoUploader({ currentLogoUrl, onFileSelect }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(currentLogoUrl);
-  const [isUploading, setIsUploading] = useState(false);
+
+  // Update preview if the logo from the parent changes (e.g., after a save)
+  useEffect(() => {
+    setPreviewUrl(currentLogoUrl);
+  }, [currentLogoUrl]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setSelectedFile(null);
-      setPreviewUrl(currentLogoUrl);
+      onFileSelect(file); // Pass the selected file up to the parent component
     }
   };
 
   const handleRemovePreview = () => {
     setSelectedFile(null);
     setPreviewUrl(currentLogoUrl);
-    // Optionally, send a request to backend to remove the logo if it was previously uploaded
-    // For now, it just clears the local selection/preview.
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      toast.error("Please select a file to upload.");
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-
-      // Assuming settingsService.uploadCompanyLogo exists and handles the API call
-      // and returns the new logo URL
-      const response = await settingsService.uploadCompanyLogo(formData); // This needs to be implemented
-
-      toast.success("Company logo uploaded successfully!");
-      onLogoUploadSuccess(response.company_logo_url); // Pass the new URL to parent
-      setSelectedFile(null); // Clear selected file after successful upload
-    } catch (error) {
-      const errorMessage = error.response?.data?.detail || "Failed to upload company logo.";
-      toast.error(errorMessage);
-      setPreviewUrl(currentLogoUrl); // Revert preview on error
-    } finally {
-      setIsUploading(false);
-    }
+    onFileSelect(null); // Notify the parent that the file has been removed
   };
 
   return (
@@ -89,14 +63,6 @@ export default function CompanyLogoUploader({ currentLogoUrl, onLogoUploadSucces
               </Button>
             </div>
           )}
-          <Button 
-            type="button" 
-            onClick={handleUpload} 
-            disabled={!selectedFile || isUploading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white dark:bg-green-700 dark:hover:bg-green-600"
-          >
-            {isUploading ? "Uploading..." : "Upload Logo"}
-          </Button>
         </div>
       </div>
     </div>

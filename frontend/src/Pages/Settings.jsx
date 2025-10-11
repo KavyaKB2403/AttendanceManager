@@ -18,26 +18,25 @@ import {
 } from "components/ui/table";
 import { useAuth } from "../auth/AuthContext"; // Import useAuth
 import { toast } from "react-hot-toast"; // For toast notifications
-
+import { settingsService } from "../lib/settings";
 
 export default function SettingsPage({ theme }) {
   const [settings, setSettings] = useState(null);
   const [holidays, setHolidays] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [staffUsers, setStaffUsers] = useState([]); // New state for staff
-  const [showAddStaffDialog, setShowAddStaffDialog] = useState(false); // New state for dialog
-  
+  const [staffUsers, setStaffUsers] = useState([]);
+  const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
   const { role } = useAuth(); // Get role from AuthContext
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [settingsData, holidayData] = await Promise.all([
-        CompanySettings.list(),
-        Holidays.list("-date")
-      ]);
-      setSettings(settingsData[0] || null);
-      setHolidays(holidayData);
+      // Use the correct settingsService
+      const settingsData = await settingsService.getSettings();
+      // For now, assuming you have a separate holidays service/API call
+      // const holidayData = await holidaysService.list(); 
+      setSettings(settingsData || null);
+      // setHolidays(holidayData);
     } catch (error) {
       toast.error("Failed to load settings data.");
     } finally {
@@ -56,23 +55,22 @@ export default function SettingsPage({ theme }) {
     }
   }, [role]);
 
-
   useEffect(() => {
     loadData();
-    loadStaff(); // Load staff data on mount
+    loadStaff();
   }, [loadData, loadStaff]);
   
-  const handleSettingsSave = async (data) => {
+  // THIS IS THE CORRECTED SAVE HANDLER
+  const handleSettingsSave = async (data, logoFile) => {
     try {
-      if (settings?.id) {
-        await CompanySettings.update(settings.id, data);
-      } else {
-        await CompanySettings.create(data);
+      const updatedSettings = await settingsService.updateSettings(data, logoFile);
+      if (updatedSettings) {
+        setSettings(updatedSettings); // Update state with the new data from the server
+        toast.success("Company settings saved!");
       }
-      await loadData();
-      toast.success("Company settings saved!");
     } catch(error) {
-      toast.error("Failed to save company settings.");
+      // The API client interceptor will already show a toast
+      console.error("Failed to save company settings.", error);
     }
   };
 

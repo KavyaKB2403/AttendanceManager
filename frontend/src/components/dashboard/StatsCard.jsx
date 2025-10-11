@@ -40,13 +40,13 @@ export default function StatsCard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.02 }}
-      className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 dark:bg-gray-800 dark:border-gray-700"
+      className="group relative overflow-hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 dark:bg-gray-800 dark:border-gray-700"
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`p-3 rounded-xl ${colorScheme.light}`}>
           <Icon className={`w-6 h-6 ${colorScheme.text}`} />
         </div>
-        <div className={`w-16 h-16 bg-gradient-to-r ${colorScheme.bg} rounded-full opacity-10 absolute top-4 right-4`}></div>
+        <div className={`w-16 h-16 bg-gradient-to-r ${colorScheme.bg} rounded-full opacity-0 group-hover:opacity-10 transform scale-75 group-hover:scale-100 transition-all duration-300 absolute top-4 right-4`}></div>
       </div>
       
       <div className="space-y-2">

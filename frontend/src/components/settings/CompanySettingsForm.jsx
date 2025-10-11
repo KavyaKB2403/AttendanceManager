@@ -4,23 +4,36 @@ import { Input } from "components/ui/input";
 import { Label } from "components/ui/label";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
-import { Switch } from "components/ui/switch"; // Import Switch component
-import CompanyLogoUploader from "./CompanyLogoUploader"; // Import CompanyLogoUploader
+import { Switch } from "components/ui/switch";
+// Import the refactored CompanyLogoUploader
+import CompanyLogoUploader from "./CompanyLogoUploader"; 
 
-export default function CompanySettingsForm({ initialData, onSave, loading, theme }) {
+// The 'onSave' prop will now receive two arguments: the form data and the logo file.
+export default function CompanySettingsForm({ initialData, onSave, loading }) {
   const [formData, setFormData] = useState({
     company_name: "",
-    standard_work_hours: 8,
+    standard_work_hours_per_day: 8, // Corrected field name to match backend
     overtime_multiplier: 1.5,
     currency: "INR",
-    mark_sundays_as_holiday: false, // Initialize new setting
-    company_logo_url: null, // Initialize company logo URL
+    mark_sundays_as_holiday: false,
+    company_logo_url: null,
   });
+  
+  // NEW STATE: State for the selected logo file is now managed here.
+  const [logoFile, setLogoFile] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      // Ensure field names match the state structure
+      setFormData({
+        company_name: initialData.company_name || "",
+        standard_work_hours_per_day: initialData.standard_work_hours_per_day || 8,
+        overtime_multiplier: initialData.overtime_multiplier || 1.5,
+        currency: initialData.currency || "INR",
+        mark_sundays_as_holiday: initialData.mark_sundays_as_holiday || false,
+        company_logo_url: initialData.company_logo_url || null,
+      });
     }
   }, [initialData]);
 
@@ -31,21 +44,28 @@ export default function CompanySettingsForm({ initialData, onSave, loading, them
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
+    
+    // Prepare the data, ensuring numbers are correctly formatted
     const dataToSave = {
       ...formData,
-      standard_work_hours: parseFloat(formData.standard_work_hours),
+      standard_work_hours_per_day: parseFloat(formData.standard_work_hours_per_day),
       overtime_multiplier: parseFloat(formData.overtime_multiplier),
     };
-    await onSave(dataToSave);
+
+    // UPDATED LOGIC: Call the onSave prop with both the text data and the logo file.
+    await onSave(dataToSave, logoFile);
+
     setIsSaving(false);
   };
 
   if (loading) {
-    return <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mt-4 animate-pulse dark:bg-gray-800 dark:border-gray-700">
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mt-4 animate-pulse dark:bg-gray-800 dark:border-gray-700">
         <div className="h-8 bg-slate-200 rounded w-1/3 mb-6 dark:bg-gray-700"></div>
         <div className="h-10 bg-slate-200 rounded my-4 dark:bg-gray-700"></div>
         <div className="h-10 bg-slate-200 rounded my-4 dark:bg-gray-700"></div>
-    </div>
+      </div>
+    );
   }
 
   return (
@@ -55,6 +75,7 @@ export default function CompanySettingsForm({ initialData, onSave, loading, them
       className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 mt-4 dark:bg-gray-800 dark:border-gray-700"
     >
       <form onSubmit={handleSubmit} className="space-y-8">
+        {/* --- Text Inputs (Corrected field names) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-2">
             <Label htmlFor="company_name" className="dark:text-gray-300">Company Name</Label>
@@ -65,8 +86,8 @@ export default function CompanySettingsForm({ initialData, onSave, loading, them
             <Input id="currency" value={formData.currency || ""} onChange={e => handleChange('currency', e.target.value)} className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="standard_work_hours" className="dark:text-gray-300">Standard Hours/Day</Label>
-            <Input id="standard_work_hours" type="number" value={formData.standard_work_hours || ""} onChange={e => handleChange('standard_work_hours', e.target.value)} className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+            <Label htmlFor="standard_work_hours_per_day" className="dark:text-gray-300">Standard Hours/Day</Label>
+            <Input id="standard_work_hours_per_day" type="number" value={formData.standard_work_hours_per_day || ""} onChange={e => handleChange('standard_work_hours_per_day', e.target.value)} className="dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="overtime_multiplier" className="dark:text-gray-300">Overtime Multiplier</Label>
@@ -74,14 +95,16 @@ export default function CompanySettingsForm({ initialData, onSave, loading, them
           </div>
         </div>
         
+        {/* --- Company Logo Uploader (Updated Props) --- */}
         <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Company Logo</h3>
           <CompanyLogoUploader 
-            currentLogoUrl={initialData?.company_logo_url}
-            onLogoUploadSuccess={(newLogoUrl) => handleChange('company_logo_url', newLogoUrl)}
+            currentLogoUrl={formData.company_logo_url}
+            onFileSelect={(file) => setLogoFile(file)} // Use onFileSelect to lift the file state up
           />
         </div>
 
+        {/* --- Holiday Settings (Unchanged) --- */}
         <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Holiday Settings</h3>
           <div className="flex items-center justify-between">
@@ -94,6 +117,7 @@ export default function CompanySettingsForm({ initialData, onSave, loading, them
           </div>
         </div>
 
+        {/* --- Save Button (Unchanged) --- */}
         <div className="flex justify-end">
           <Button type="submit" disabled={isSaving} className="dark:bg-blue-700 dark:hover:bg-blue-600 dark:text-white">
             <Save className="w-4 h-4 mr-2" />

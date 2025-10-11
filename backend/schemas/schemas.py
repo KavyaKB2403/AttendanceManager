@@ -48,12 +48,15 @@ class EmployeeBase(BaseModel):
     bank_account: Optional[str] = None # Renamed from email
     position: Optional[str] = None
     department: Optional[str] = None
+    status: Optional[str] = "active"
+    salary_effective_from: Optional[date] = None
 
 class EmployeeCreate(EmployeeBase): ...
 class EmployeeUpdate(EmployeeBase): ...
 
 class EmployeeOut(EmployeeBase):
     id: int
+    last_updated_at: Optional[datetime] = None
     class Config:
         from_attributes = True
 
@@ -112,6 +115,9 @@ class SalaryRow(BaseModel):
     base_monthly_salary: float
     days_present: int
     half_days: int
+    work_days: float
+    paid_holiday_days: float
+    total_paid_days: float
     total_overtime_hours: float
     total_late_hours: float # Added total_late_hours field
     hourly_rate: float

@@ -57,6 +57,22 @@ export default function DailyAttendanceTable({
     }));
   };
 
+  const handleSaveAll = async () => {
+    const changedIds = Object.keys(dailyRecords).filter(id => dailyRecords[id]?.changed);
+    for (const id of changedIds) {
+      const rec = dailyRecords[id];
+      await onUpdate(Number(id), selectedDate, rec.status, rec.overtime, rec.late_hours);
+    }
+    // Reset all changed flags after bulk save
+    setDailyRecords(prev => {
+      const next = { ...prev };
+      changedIds.forEach(id => {
+        next[id] = { ...next[id], changed: false };
+      });
+      return next;
+    });
+  };
+
   const getHolidayOvertime = (employeeId) => {
     const status = dailyRecords[employeeId]?.status;
     if (isHoliday && status === 'present') {
@@ -174,6 +190,18 @@ export default function DailyAttendanceTable({
             ))}
           </TableBody>
         </Table>
+      </div>
+      <div className="p-4 border-t flex items-center justify-between bg-slate-50 dark:bg-gray-900 dark:border-gray-700">
+        <div className="text-sm text-slate-600 dark:text-gray-300">
+          {Object.values(dailyRecords).filter(r => r?.changed).length} change(s) not saved
+        </div>
+        <Button 
+          onClick={handleSaveAll} 
+          disabled={Object.values(dailyRecords).every(r => !r?.changed)}
+          className="dark:bg-blue-700 dark:text-white disabled:opacity-50"
+        >
+          <Save className="w-4 h-4 mr-2" /> Save All
+        </Button>
       </div>
     </div>
   );

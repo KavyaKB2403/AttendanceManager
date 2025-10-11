@@ -132,7 +132,7 @@ export default function Layout({ children, currentPageName, onSignOut, theme, to
                     {companyName ? companyName.charAt(0).toUpperCase() : user?.name?.charAt(0).toUpperCase() || "P"}
                   </div>
                 )}
-                Profile
+                {companyName || "Profile"}
               </Button>
             </div>
 
@@ -207,7 +207,7 @@ export default function Layout({ children, currentPageName, onSignOut, theme, to
                     {companyName ? getCompanyInitials(companyName) : user?.name?.charAt(0).toUpperCase() || "P"}
                   </div>
                 )}
-                Profile
+                {companyName || "Profile"}
               </Button>
             </div>
           </motion.div>

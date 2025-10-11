@@ -12,10 +12,17 @@ import {
 } from "components/ui/table";
 import { Badge } from "components/ui/badge";
 import { Button } from "components/ui/button";
-import { Landmark, CreditCard, Calendar, IndianRupee, Trash2 } from "lucide-react";
+import { Landmark, CreditCard, Calendar, IndianRupee, Trash2, PencilLine, History } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "components/ui/dialog";
+import { Input } from "components/ui/input";
+import { Label } from "components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "components/ui/select";
 
 export default function EmployeeTable({ employees, loading, onEmployeeUpdate, theme }) {
   // const [deletingId, setDeletingId] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", position: "", department: "", bank_account: "", base_salary: 0, status: "active", salary_effective_from: "" });
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const handleDelete = async (employeeId) => {
     console.log("Frontend: Attempting to delete employee with ID:", employeeId);
@@ -39,6 +46,35 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
       default:
         return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700";
     }
+  };
+
+  const openEdit = (emp) => {
+    setEditing(emp);
+    setEditForm({
+      name: emp.name || "",
+      position: emp.position || "",
+      department: emp.department || "",
+      bank_account: emp.bank_account || "",
+      base_salary: emp.base_salary || 0,
+      status: emp.status || "active",
+      salary_effective_from: "",
+    });
+  };
+
+  const submitEdit = async () => {
+    if (!editing) return;
+    await Employees.update(editing.id, {
+      name: editForm.name,
+      position: editForm.position,
+      department: editForm.department,
+      bank_account: editForm.bank_account,
+      base_salary: Number(editForm.base_salary),
+      status: editForm.status,
+      // pass through additional field for backend (mapped in entities/all.ts)
+      salary_effective_from: editForm.salary_effective_from || undefined,
+    });
+    setEditing(null);
+    await onEmployeeUpdate?.();
   };
 
   if (loading) {
@@ -76,7 +112,7 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
           <TableHeader>
             <TableRow className="bg-slate-50 dark:bg-gray-800">
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Employee</TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Position</TableHead>
+              <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Bank</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Bank Account</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Salary</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Hire Date</TableHead>
@@ -91,7 +127,7 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="hover:bg-slate-50 transition-colors dark:hover:bg-gray-700 dark:border-gray-700"
+                className={`hover:bg-slate-50 transition-colors dark:hover:bg-gray-700 dark:border-gray-700 ${employee.status === 'inactive' ? 'bg-slate-100 dark:bg-gray-900' : ''}`}
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
@@ -145,21 +181,83 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    // disabled={deletingId === employee.id} // Re-add if needed for visual feedback
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700"
-                    onClick={() => handleDelete(employee.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" size="icon"
+                      className="text-slate-600 hover:text-slate-800 hover:bg-slate-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
+                      onClick={() => openEdit(employee)}
+                    >
+                      <PencilLine className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" size="icon"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700"
+                      onClick={() => handleDelete(employee.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </motion.tr>
             ))}
           </TableBody>
         </Table>
       </div>
+      {/* Edit Dialog */}
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
+            <div>
+              <Label>Name</Label>
+              <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+            </div>
+            <div>
+              <Label>Position</Label>
+              <Input value={editForm.position} onChange={(e) => setEditForm({ ...editForm, position: e.target.value })} />
+            </div>
+            <div>
+              <Label>Department</Label>
+              <Input value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })} />
+            </div>
+            <div>
+              <Label>Bank Account</Label>
+              <Input value={editForm.bank_account} onChange={(e) => setEditForm({ ...editForm, bank_account: e.target.value })} />
+            </div>
+            <div>
+              <Label>Monthly Salary</Label>
+              <Input type="number" min="0" step="500" value={editForm.base_salary} onChange={(e) => setEditForm({ ...editForm, base_salary: e.target.value })} />
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Salary Effective From</Label>
+              <Input type="date" value={editForm.salary_effective_from} onChange={(e) => setEditForm({ ...editForm, salary_effective_from: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            {editing?.last_updated_at && (
+              <div className="mr-auto text-sm text-slate-500 flex items-center gap-1">
+                <History className="w-4 h-4" /> Last updated: {format(new Date(editing.last_updated_at), 'MMM d, yyyy h:mm a')}
+              </div>
+            )}
+            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button onClick={submitEdit}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

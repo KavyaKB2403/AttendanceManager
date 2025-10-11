@@ -27,6 +27,8 @@ def get_settings_hours(db: Session, effective_user_id: int) -> float: # Use effe
 def upsert_attendance(payload: AttendanceCreate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: int = Depends(get_effective_user_id)):
     emp = db.get(Employee, payload.employee_id)
     if not emp or emp.user_id != effective_user_id: raise HTTPException(status_code=404, detail="Employee not found or not associated with your data")
+    if getattr(emp, "status", "active") == "inactive":
+        raise HTTPException(status_code=400, detail="Cannot mark attendance for inactive employee")
 
     logger.info(f"Effective user ID {effective_user_id} received attendance payload: {payload.model_dump()}")
 

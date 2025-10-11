@@ -24,7 +24,7 @@ class User(Base):
     last_login_at = Column(DateTime, nullable=True)
     created_by_admin_id = Column(Integer, ForeignKey("users.id"), nullable=True) # For staff, links to admin who created them
 
-    employees = relationship("Employee", back_populates="owner", cascade="all, delete-orphan")
+    employees = relationship("Employee", back_populates="owner", cascade="all, delete-orphan", foreign_keys="Employee.user_id")
     holidays = relationship("Holiday", back_populates="owner", cascade="all, delete-orphan")
     settings = relationship("Settings", back_populates="owner", uselist=False, cascade="all, delete-orphan")
     password_resets = relationship("PasswordReset", back_populates="user", cascade="all, delete-orphan")
@@ -39,8 +39,16 @@ class Employee(Base):
     position = Column(String(100), nullable=True)
     department = Column(String(100), nullable=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    # New fields for status and simple audit/salary effectivity
+    status = Column(String(20), default="active", nullable=False)
+    salary_effective_from = Column(Date, nullable=True)
+    inactive_from = Column(Date, nullable=True)
+    last_updated_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    last_updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    owner = relationship("User", back_populates="employees")
+    owner = relationship("User", back_populates="employees", foreign_keys=[user_id])
+    # Optional relationship to the user who last updated the record
+    last_updated_by_user = relationship("User", foreign_keys=[last_updated_by])
     attendance = relationship("AttendanceRecord", back_populates="employee", cascade="all,delete")
 
 class AttendanceRecord(Base):

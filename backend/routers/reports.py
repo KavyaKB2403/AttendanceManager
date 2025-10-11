@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date, datetime
 from calendar import monthrange
 from db import get_db
-from models.models import Employee, AttendanceRecord, Settings
+from models.models import Employee, AttendanceRecord, Settings, Holiday
 from schemas.schemas import SalaryRow
 from routers.auth import get_current_user, get_effective_user_id # Import get_effective_user_id
 from typing import List, Optional
@@ -24,6 +24,10 @@ def salary_report(month: str = Query(..., description="YYYY-MM"), db: Session = 
     from datetime import timedelta
     dates = month_dates(year, mon)
     total_calendar_days_in_month = monthrange(year, mon)[1]
+    # Load holidays for the effective user within the month
+    month_start = date(year, mon, 1)
+    month_end = date(year, mon, total_calendar_days_in_month)
+    holiday_dates = set(h.date for h in db.query(Holiday).filter(Holiday.user_id == effective_user_id, Holiday.date >= month_start, Holiday.date <= month_end).all())
 
     out: List[SalaryRow] = []
     emps = db.query(Employee).filter(Employee.user_id == effective_user_id).all()
@@ -34,13 +38,21 @@ def salary_report(month: str = Query(..., description="YYYY-MM"), db: Session = 
         half_days = sum(1 for r in recs if r.status.value == "Half-day")
         total_ot = sum((r.manual_overtime_hours or 0.0) + (r.automatic_overtime_hours or 0.0) for r in recs)
         total_late = sum((r.late_hours or 0.0) for r in recs) # Sum late hours
-        hourly_rate = (e.monthly_salary or 0.0) / max(1, total_calendar_days_in_month * std_hours)
-        regular_hours = days_present * std_hours + half_days * (std_hours / 2.0) # Regular hours calculation remains based on standard_work_hours_per_day
+        # Compute paid holidays on/after employee's joining date and before inactive_from if set
+        paid_holidays_for_emp = {d for d in holiday_dates if (e.date_of_joining is None or d >= e.date_of_joining) and (e.inactive_from is None or d <= e.inactive_from)}
+        paid_holiday_days = float(len(paid_holidays_for_emp))
+        work_days = float(days_present) + 0.5 * float(half_days)
+        total_paid_days = work_days + paid_holiday_days
+        # Hourly rate based on full month capacity: total month days * standard hours
+        hourly_rate = (e.monthly_salary or 0.0) / max(1.0, total_calendar_days_in_month * std_hours)
+        # Regular hours include paid holidays once; do not double count with presence on holiday
+        regular_hours = (days_present * std_hours) + (half_days * (std_hours / 2.0)) + (paid_holiday_days * std_hours)
         total_hours_worked = regular_hours + total_ot - total_late # Deduct late hours
         total_payable = hourly_rate * total_hours_worked
         out.append(SalaryRow(
             employee_id=e.id, name=e.name, base_monthly_salary=e.monthly_salary,
             days_present=days_present, half_days=half_days,
+            work_days=round(work_days,2), paid_holiday_days=round(paid_holiday_days,2), total_paid_days=round(total_paid_days,2),
             total_overtime_hours=round(total_ot,2), total_late_hours=round(total_late,2), hourly_rate=round(hourly_rate,2),
             total_hours_worked=round(total_hours_worked,2), total_payable_salary=round(total_payable,2),
         ))
@@ -51,8 +63,8 @@ def salary_report_csv(month: str, db: Session = Depends(get_db), effective_user_
     data = salary_report(month, db, effective_user_id) # Pass effective_user_id
     buf = io.StringIO()
     writer = csv.writer(buf)
-    writer.writerow(["Employee ID","Name","Base Monthly Salary","Days Present","Half Days","Total OT (h)","Total Late (h)","Hourly Rate","Total Hours Worked","Total Payable Salary"])
+    writer.writerow(["Employee ID","Name","Base Monthly Salary","Days Present","Half Days","Work Days","Paid Holidays","Total Paid Days","Total OT (h)","Total Late (h)","Hourly Rate","Total Hours Worked","Total Payable Salary"])
     for row in data:
-        writer.writerow([row.employee_id, row.name, row.base_monthly_salary, row.days_present, row.half_days, row.total_overtime_hours, row.total_late_hours, row.hourly_rate, row.total_hours_worked, row.total_payable_salary])
+        writer.writerow([row.employee_id, row.name, row.base_monthly_salary, row.days_present, row.half_days, row.work_days, row.paid_holiday_days, row.total_paid_days, row.total_overtime_hours, row.total_late_hours, row.hourly_rate, row.total_hours_worked, row.total_payable_salary])
     csv_bytes = buf.getvalue().encode("utf-8")
     return Response(content=csv_bytes, media_type="text/csv", headers={"Content-Disposition": f"attachment; filename=salary_{month}.csv"})

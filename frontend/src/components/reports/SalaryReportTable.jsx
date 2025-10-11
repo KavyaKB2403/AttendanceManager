@@ -23,6 +23,8 @@ export default function SalaryReportTable({ data, loading, currency, theme }) {
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Base Monthly Salary</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Hourly Rate</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Work Days</TableHead>
+              <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Paid Holidays</TableHead>
+              <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Total Paid Days</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Regular Hours</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Overtime</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Late Hours</TableHead>
@@ -42,7 +44,9 @@ export default function SalaryReportTable({ data, loading, currency, theme }) {
                 <TableCell className="font-medium text-slate-800 dark:text-white">{row.name}</TableCell>
                 <TableCell>{currency}{row.base_monthly_salary.toLocaleString()}</TableCell>
                 <TableCell>{currency}{row.hourly_rate.toFixed(2)}</TableCell>
-                <TableCell>{((Number(row.days_present ?? 0)) + (Number(row.half_days ?? 0)) * 0.5)}</TableCell>
+                <TableCell>{(Number(row.work_days ?? (((Number(row.days_present ?? 0)) + (Number(row.half_days ?? 0)) * 0.5))))}</TableCell>
+                <TableCell>{Number(row.paid_holiday_days ?? 0)}</TableCell>
+                <TableCell>{(Number(row.total_paid_days ?? 0))}</TableCell>
                 <TableCell>{(row.total_hours_worked - row.total_overtime_hours + row.total_late_hours).toFixed(2)}h</TableCell>
                 <TableCell>{row.total_overtime_hours.toFixed(2)}h</TableCell>
                 <TableCell>{row.total_late_hours.toFixed(2)}h</TableCell>

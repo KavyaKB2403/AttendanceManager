@@ -19,6 +19,9 @@ export interface ApiEmployee {
   bank_account?: string; // Renamed from email
   position?: string;
   department?: string;
+  status?: "active" | "inactive";
+  salary_effective_from?: string;
+  last_updated_at?: string;
 }
 
 export interface ApiAttendance {
@@ -63,6 +66,7 @@ export interface UiEmployee {
   bank_account?: string; // Renamed from email
   position?: string;
   department?: string;
+  last_updated_at?: string;
 }
 
 export interface UiAttendance {
@@ -117,10 +121,11 @@ function toUiEmployee(e: ApiEmployee): UiEmployee {
     name: e.name,
     base_salary: e.monthly_salary ?? 0,
     hire_date: e.date_of_joining,
-    status: "active",
+    status: (e.status as any) || "active",
     bank_account: e.bank_account, // Corrected from email
     position: e.position,
     department: e.department,
+    last_updated_at: e.last_updated_at,
   };
 }
 
@@ -137,6 +142,8 @@ function toApiEmployee(e: Partial<UiEmployee>): Partial<ApiEmployee> {
     bank_account: e.bank_account || undefined,
     position: e.position,
     department: e.department,
+    status: e.status,
+    salary_effective_from: (e as any).salary_effective_from,
   };
 }
 

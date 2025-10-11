@@ -40,7 +40,8 @@ app.add_middleware(
 
 # Create database tables (SQLite or configured DB) if they don't exist
 # Base.metadata.create_all(bind=engine)
-app.mount("/static", StaticFiles(directory="static"), name="static") # Mount static files
+#app.mount("/static", StaticFiles(directory="static"), name="static") # Mount static files
+
 # Routers
 app.include_router(auth.router)
 app.include_router(employees.router)
@@ -55,4 +56,4 @@ def root():
 
 if __name__ == "__main__":
     # For local development
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
