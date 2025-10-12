@@ -6,7 +6,7 @@ import CompanySettingsForm from "../components/settings/CompanySettingsForm";
 import HolidayManager from "../components/settings/HolidayManager";
 import AddStaffDialog from "components/admin/AddStaffDialog";
 import { adminService } from "api/admin";
-import { settingsService } from "../services/settings"; // Correct: For company settings
+import { settingsService } from "../lib/settings"; // Correct: For company settings
 import { settings as settingsApi } from "../api/client"; // Correct: For holiday functions
 import { Button } from "components/ui/button";
 import {
