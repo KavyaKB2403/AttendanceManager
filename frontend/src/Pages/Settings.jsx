@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { CompanySettings, Holidays } from "entities/all";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/tabs";
-import { Settings as SettingsIcon, CalendarDays, UsersRound, KeyRound, PlusCircle, Trash2 } from "lucide-react"; // Added UsersRound, KeyRound, PlusCircle, Trash2
+import { Settings as SettingsIcon, CalendarDays, UsersRound, KeyRound, PlusCircle, Trash2 } from "lucide-react";
 import CompanySettingsForm from "../components/settings/CompanySettingsForm";
 import HolidayManager from "../components/settings/HolidayManager";
-import AddStaffDialog from "components/admin/AddStaffDialog"; // Import AddStaffDialog
-import { adminService } from "api/admin"; // Import adminService
+import AddStaffDialog from "components/admin/AddStaffDialog";
+import { adminService } from "api/admin";
+import { settingsService } from "../services/settings"; // Correct: For company settings
+import { settings as settingsApi } from "../api/client"; // Correct: For holiday functions
 import { Button } from "components/ui/button";
 import {
   Table,
@@ -16,9 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "components/ui/table";
-import { useAuth } from "../auth/AuthContext"; // Import useAuth
-import { toast } from "react-hot-toast"; // For toast notifications
-import { settingsService } from "../lib/settings";
+import { useAuth } from "../auth/AuthContext";
+import { toast } from "react-hot-toast";
 
 export default function SettingsPage({ theme }) {
   const [settings, setSettings] = useState(null);
@@ -26,21 +26,24 @@ export default function SettingsPage({ theme }) {
   const [loading, setLoading] = useState(true);
   const [staffUsers, setStaffUsers] = useState([]);
   const [showAddStaffDialog, setShowAddStaffDialog] = useState(false);
-  const { role } = useAuth(); // Get role from AuthContext
+  const { role } = useAuth();
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  // --- REFACTORED AND CORRECTED DATA FETCHING ---
+  const loadSettings = useCallback(async () => {
     try {
-      // Use the correct settingsService
       const settingsData = await settingsService.getSettings();
-      // For now, assuming you have a separate holidays service/API call
-      // const holidayData = await holidaysService.list(); 
       setSettings(settingsData || null);
-      // setHolidays(holidayData);
     } catch (error) {
-      toast.error("Failed to load settings data.");
-    } finally {
-      setLoading(false);
+      toast.error("Failed to load company settings.");
+    }
+  }, []);
+
+  const loadHolidays = useCallback(async () => {
+    try {
+      const holidayData = await settingsApi.listHolidays();
+      setHolidays(holidayData);
+    } catch (error) {
+      toast.error("Failed to load holidays.");
     }
   }, []);
 
@@ -56,28 +59,31 @@ export default function SettingsPage({ theme }) {
   }, [role]);
 
   useEffect(() => {
-    loadData();
-    loadStaff();
-  }, [loadData, loadStaff]);
+    const loadAllData = async () => {
+      setLoading(true);
+      await Promise.all([loadSettings(), loadHolidays(), loadStaff()]);
+      setLoading(false);
+    };
+    loadAllData();
+  }, [loadSettings, loadHolidays, loadStaff]);
   
-  // THIS IS THE CORRECTED SAVE HANDLER
+  // --- CORRECTED SAVE HANDLERS ---
   const handleSettingsSave = async (data, logoFile) => {
     try {
       const updatedSettings = await settingsService.updateSettings(data, logoFile);
       if (updatedSettings) {
-        setSettings(updatedSettings); // Update state with the new data from the server
+        setSettings(updatedSettings);
         toast.success("Company settings saved!");
       }
     } catch(error) {
-      // The API client interceptor will already show a toast
       console.error("Failed to save company settings.", error);
     }
   };
 
   const handleHolidayAdd = async (data) => {
     try {
-      await Holidays.create(data);
-      await loadData();
+      await settingsApi.addHoliday(data);
+      await loadHolidays(); // ONLY reloads holidays
       toast.success("Holiday added successfully!");
     } catch(error) {
       toast.error("Failed to add holiday.");
@@ -86,8 +92,8 @@ export default function SettingsPage({ theme }) {
   
   const handleHolidayDelete = async (id) => {
     try {
-      await Holidays.delete(id);
-      await loadData();
+      await settingsApi.deleteHoliday(id);
+      await loadHolidays(); // ONLY reloads holidays
       toast.success("Holiday deleted successfully!");
     } catch(error) {
       toast.error("Failed to delete holiday.");
@@ -95,18 +101,15 @@ export default function SettingsPage({ theme }) {
   };
 
   const handleStaffAdded = () => {
-    // setShowAddStaffDialog(false); // Do NOT close the dialog here
-    loadStaff(); // Refresh staff list
+    loadStaff();
   };
 
   const handleResetStaffPassword = async (userId, staffEmail) => {
     if (window.confirm(`Are you sure you want to reset the password for ${staffEmail}?`)) {
       try {
         const response = await adminService.resetStaffPassword(userId);
-        toast.success(`Password Reset Successfully! Temporary Password: ${response.new_temporary_password}. Please provide this to ${staffEmail}.`,
-          { duration: 10000 }
-        );
-        loadStaff(); // Refresh staff list if needed (though password reset doesn't change visible data)
+        toast.success(`Password Reset Successfully! Temporary Password: ${response.new_temporary_password}. Please provide this to ${staffEmail}.`, { duration: 10000 });
+        loadStaff();
       } catch (error) {
         toast.error(error.response?.data?.detail || "Failed to reset staff password.");
       }
@@ -118,7 +121,7 @@ export default function SettingsPage({ theme }) {
       try {
         await adminService.deleteStaff(userId);
         toast.success(`Staff member "${staffName}" deleted successfully!`);
-        loadStaff(); // Refresh staff list
+        loadStaff();
       } catch (error) {
         toast.error(error.response?.data?.detail || "Failed to delete staff member.");
       }
@@ -127,19 +130,16 @@ export default function SettingsPage({ theme }) {
 
   return (
     <div className="space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-bold text-slate-800 dark:text-white">System Settings</h1>
         <p className="text-slate-600 mt-1 dark:text-gray-300">Configure company policies and holidays</p>
       </motion.div>
 
       <Tabs defaultValue="company" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"> {/* Changed grid-cols-2 to grid-cols-3 */}
+        <TabsList className="grid w-full grid-cols-3 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600">
           <TabsTrigger value="company" className="dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700"><SettingsIcon className="w-4 h-4 mr-2" />Company Settings</TabsTrigger>
           <TabsTrigger value="holidays" className="dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700"><CalendarDays className="w-4 h-4 mr-2" />Holiday Management</TabsTrigger>
-          {role === 'admin' && ( // Conditionally render Staff Management tab for admins
+          {role === 'admin' && (
             <TabsTrigger value="staff-management" className="dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700">
               <UsersRound className="w-4 h-4 mr-2" />Staff Management
             </TabsTrigger>
@@ -162,7 +162,7 @@ export default function SettingsPage({ theme }) {
             theme={theme}
           />
         </TabsContent>
-        {role === 'admin' && ( // Conditionally render Staff Management content for admins
+        {role === 'admin' && (
           <TabsContent value="staff-management">
             <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
               <div className="flex justify-between items-center mb-6">
@@ -220,7 +220,7 @@ export default function SettingsPage({ theme }) {
             <AddStaffDialog
               open={showAddStaffDialog}
               onClose={() => setShowAddStaffDialog(false)}
-              onStaffAdded={handleStaffAdded} // Callback for when staff is successfully added
+              onStaffAdded={handleStaffAdded}
             />
           </TabsContent>
         )}
