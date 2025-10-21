@@ -7,7 +7,9 @@ interface User {
   email: string;
   name: string;
   role: 'admin' | 'staff';
+  employee_id?: number; // Add optional employee_id
   companyLogoUrl?: string; // Add optional companyLogoUrl
+  companyName?: string; // Add optional companyName to User interface
   lastLoginAt?: string; // Add optional lastLoginAt
 }
 
@@ -43,29 +45,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email: decoded.email,
           name: decoded.name,
           role: decoded.admin ? 'admin' : 'staff', // Determine role based on 'admin' field
+          employee_id: decoded.employee_id || undefined, // Get employee_id from token
           companyLogoUrl: decoded.company_logo_url || null, // Get company logo URL from token
+          companyName: decoded.company_name || null, // Get company name from token
           lastLoginAt: decoded.last_login_at || null, // Get last login timestamp from token
         };
         setUser(currentUser);
         setRole(currentUser.role);
         setCompanyLogoUrl(currentUser.companyLogoUrl); // Set company logo URL
+        setCompanyName(currentUser.companyName); // Set company name
         setLastLoginAt(currentUser.lastLoginAt); // Set last login timestamp
         setIsAuthenticated(true);
         localStorage.setItem('token', token);
 
-        // Fetch company settings to get the company name and logo URL
-        const fetchCompanySettings = async () => {
-          try {
-            const settings = await settingsService.getSettings();
-            if (settings) {
-              setCompanyName(settings.company_name || null);
-              setCompanyLogoUrl(settings.company_logo_url || null); // Update company logo URL from settings
-            }
-          } catch (error) {
-            console.error("Failed to fetch company settings:", error);
-          }
-        };
-        fetchCompanySettings();
+        // Remove fetching company settings as it's now in the token
+        // const fetchCompanySettings = async () => {
+        //   try {
+        //     const settings = await settingsService.getSettings();
+        //     if (settings) {
+        //       setCompanyName(settings.company_name || null);
+        //       setCompanyLogoUrl(settings.company_logo_url || null); // Update company logo URL from settings
+        //     }
+        //   } catch (error) {
+        //     console.error("Failed to fetch company settings:", error);
+        //   }
+        // };
+        // fetchCompanySettings();
       } catch (error) {
         console.error('Failed to decode token:', error);
         // If token is invalid, clear it

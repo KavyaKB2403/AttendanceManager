@@ -13,8 +13,8 @@ const getCompanyInitials = (name) => {
   return words.map(word => word.charAt(0)).join('').toUpperCase();
 };
 
-export default function ProfileCard({ user, companyLogoUrl, onSignOut, onClose }) {
-  const { companyName, lastLoginAt } = useAuth(); // Get companyName and lastLoginAt directly from AuthContext
+export default function ProfileCard({ user, companyLogoUrl, onSignOut, onClose, companyName }) {
+  const { lastLoginAt } = useAuth(); // Get lastLoginAt directly from AuthContext
   const navigate = useNavigate(); // Initialize useNavigate
   const lastLogin = "N/A"; // Placeholder for now
 

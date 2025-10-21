@@ -6,8 +6,7 @@ import CompanySettingsForm from "../components/settings/CompanySettingsForm";
 import HolidayManager from "../components/settings/HolidayManager";
 import AddStaffDialog from "components/admin/AddStaffDialog";
 import { adminService } from "api/admin";
-import { settingsService } from "../lib/settings"; // Correct: For company settings
-import { settings as settingsApi } from "../api/client"; // Correct: For holiday functions
+import { settingsService } from "../lib/settings"; // Correct: For company settings and holiday functions
 import { Button } from "components/ui/button";
 import {
   Table,
@@ -40,7 +39,7 @@ export default function SettingsPage({ theme }) {
 
   const loadHolidays = useCallback(async () => {
     try {
-      const holidayData = await settingsApi.listHolidays();
+      const holidayData = await settingsService.listHolidays();
       setHolidays(holidayData);
     } catch (error) {
       toast.error("Failed to load holidays.");
@@ -80,9 +79,9 @@ export default function SettingsPage({ theme }) {
     }
   };
 
-  const handleHolidayAdd = async (data) => {
+  const handleHolidayAdd = async (data, overridePastAttendance) => {
     try {
-      await settingsApi.addHoliday(data);
+      await settingsService.addHoliday(data, overridePastAttendance); // Pass overridePastAttendance
       await loadHolidays(); // ONLY reloads holidays
       toast.success("Holiday added successfully!");
     } catch(error) {
@@ -90,13 +89,14 @@ export default function SettingsPage({ theme }) {
     }
   };
   
-  const handleHolidayDelete = async (id) => {
+  const handleHolidayDelete = async (id, revertAttendance) => {
     try {
-      await settingsApi.deleteHoliday(id);
+      await settingsService.deleteHoliday(id, revertAttendance); // Pass revertAttendance
       await loadHolidays(); // ONLY reloads holidays
       toast.success("Holiday deleted successfully!");
     } catch(error) {
-      toast.error("Failed to delete holiday.");
+      console.error("Holiday Deletion Error:", error);
+      toast.error("Failed to delete holiday. Check console for details.");
     }
   };
 

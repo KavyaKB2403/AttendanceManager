@@ -72,14 +72,6 @@ export default function DailyAttendanceTable({
       return next;
     });
   };
-
-  const getHolidayOvertime = (employeeId) => {
-    const status = dailyRecords[employeeId]?.status;
-    if (isHoliday && status === 'present') {
-      return companySettings?.standard_work_hours || 8;
-    }
-    return 0;
-  };
   
   if (loading) {
      return <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 animate-pulse dark:bg-gray-800 dark:border-gray-700">
@@ -105,7 +97,6 @@ export default function DailyAttendanceTable({
             <TableRow className="bg-slate-50 dark:bg-gray-800">
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Employee</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Status</TableHead>
-              <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Overtime (Holiday)</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Overtime (Manual)</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Late Hours</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Actions</TableHead>
@@ -142,11 +133,6 @@ export default function DailyAttendanceTable({
                       <SelectItem value="half_day">Half-day</SelectItem>
                     </SelectContent>
                   </Select>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="dark:bg-purple-800 dark:text-purple-100">
-                    {getHolidayOvertime(employee.id)}h
-                  </Badge>
                 </TableCell>
                 <TableCell>
                   <Input

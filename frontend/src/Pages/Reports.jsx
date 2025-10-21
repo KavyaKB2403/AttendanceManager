@@ -6,12 +6,14 @@ import ReportFilters from "../components/reports/ReportFilters";
 import SalaryReportTable from "../components/reports/SalaryReportTable";
 import { Download, AlertTriangle } from "lucide-react";
 import { Button } from "components/ui/button";
+import { useAuth } from "../auth/AuthContext";
 
 export default function ReportsPage({ theme }) {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const { user } = useAuth();
 
   const memoizedReportData = useMemo(() => reportData, [reportData]);
 
@@ -30,7 +32,14 @@ export default function ReportsPage({ theme }) {
         return;
       }
       
-      const report = await Reports.getSalaryReport(format(selectedMonth, 'yyyy-MM'));
+      const monthParam = format(selectedMonth, 'yyyy-MM');
+      let report;
+
+      if (user && user.role === "staff" && user.employee_id) {
+        report = await Reports.getSalaryReport(monthParam, user.employee_id);
+      } else {
+        report = await Reports.getSalaryReport(monthParam);
+      }
       setReportData(report);
 
     } catch (error) {
@@ -38,31 +47,40 @@ export default function ReportsPage({ theme }) {
     } finally {
       setLoading(false);
     }
-  }, [selectedMonth]);
+  }, [selectedMonth, user]);
 
   useEffect(() => {
     generateReport();
   }, [generateReport]);
 
-  const handleExport = () => {
-    const headers = ["Employee", "Base Salary", "Hourly Rate", "Present Days", "Regular Hours", "Total Overtime", "Total Late Hours", "Total Payable"]; // Add "Total Late Hours"
-    const rows = reportData.map(d => [
-      d.name,
-      d.base_monthly_salary.toFixed(2),
-      d.hourly_rate.toFixed(2),
-      d.present_days + d.half_days * 0.5,
-      d.regular_hours.toFixed(2),
-      d.total_overtime_hours.toFixed(2),
-      d.total_late_hours.toFixed(2), // Add total late hours
-      d.total_payable_salary.toFixed(2)
-    ]);
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    const link = document.createElement("a");
-    link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute("download", `Salary_Report_${format(selectedMonth, "MMMM_yyyy")}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExport = async () => {
+    try {
+      const monthParam = format(selectedMonth, 'yyyy-MM');
+      let employeeIdParam = undefined;
+
+      if (user && user.role === "staff" && user.employee_id) {
+        employeeIdParam = user.employee_id;
+      }
+
+      const csvBlob = await Reports.exportCSV(monthParam, employeeIdParam);
+
+      // Create a URL for the blob and trigger download
+      const url = window.URL.createObjectURL(csvBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Salary_Report_${format(selectedMonth, "MMMM_yyyy")}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url); // Clean up the object URL
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      // Display an error toast to the user
+      import('react-hot-toast').then(module => {
+        const toast = module.default;
+        toast.error("Failed to export CSV report.");
+      });
+    }
   };
 
   return (

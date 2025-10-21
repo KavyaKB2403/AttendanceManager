@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useContext } from "react";
 import { Employees, Attendances, Holidays, CompanySettings } from "entities/all";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { motion } from "framer-motion";
@@ -6,6 +6,7 @@ import { Button } from "components/ui/button";
 import { ChevronLeft, ChevronRight, AlertTriangle, User } from "lucide-react";
 import AttendanceCalendar from "../components/attendance/AttendanceCalender";
 import DailyAttendanceTable from "../components/attendance/DailyAttendanceTable";
+import { useAuth } from "../auth/AuthContext";
 // import { v4 as uuidv4 } from 'uuid'; // Removed as callId is no longer used
 
 export default function AttendancePage({ theme }) {
@@ -13,6 +14,7 @@ export default function AttendancePage({ theme }) {
   const [attendance, setAttendance] = useState([]);
   const [holidays, setHolidays] = useState([]);
   const [settings, setSettings] = useState(null);
+  const { user } = useAuth(); // Get logged-in user info
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -34,10 +36,21 @@ export default function AttendancePage({ theme }) {
       setHolidays(holidayData);
       setSettings(settingsData[0]);
       
-      const attendanceData = await Attendances.filter({
-        start: format(monthStart, 'yyyy-MM-dd'),
-        end: format(monthEnd, 'yyyy-MM-dd'),
-      });
+      let attendanceData;
+      if (user && user.role === "staff" && user.employee_id) {
+        // If staff, fetch only their attendance
+        attendanceData = await Attendances.filter({ // Assuming Attendances.filter can take employee_id
+          employee_id: user.employee_id,
+          start: format(monthStart, 'yyyy-MM-dd'),
+          end: format(monthEnd, 'yyyy-MM-dd'),
+        });
+      } else {
+        // If admin or no specific user, fetch all attendance
+        attendanceData = await Attendances.filter({
+          start: format(monthStart, 'yyyy-MM-dd'),
+          end: format(monthEnd, 'yyyy-MM-dd'),
+        });
+      }
       setAttendance(attendanceData);
       console.log("loadData: Fetched attendanceData (after update):", attendanceData);
       
@@ -46,7 +59,7 @@ export default function AttendancePage({ theme }) {
     } finally {
       setLoading(false);
     }
-  }, [monthStart, monthEnd]);
+  }, [monthStart, monthEnd, user]);
 
   useEffect(() => {
     loadData();
@@ -56,10 +69,6 @@ export default function AttendancePage({ theme }) {
     // const callId = uuidv4(); // Removed unused variable
     const dateStr = format(date, 'yyyy-MM-dd');
     const existingRecord = attendance.find(a => a.employee_id === employeeId && a.date === dateStr);
-
-    // const isHoliday = holidays.some(h => h.date === dateStr); // Removed unused variable
-    // const holidayOvertime = (isHoliday && status === 'present') ? (settings?.standard_work_hours || 8) : 0; // Removed unused variable
-    // const regularHours = status === 'present' ? (settings?.standard_work_hours || 8) : status === 'half_day' ? (settings?.standard_work_hours || 8) / 2 : 0; // Removed unused variable
 
     const dataToSave = {
       employee_id: employeeId,

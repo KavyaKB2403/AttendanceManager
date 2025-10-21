@@ -30,14 +30,24 @@ import { Employees } from "entities/all"
 
 export const attendanceService = {
   // Get all attendance records
-  async getAttendanceRecords(): Promise<AttendanceRecord[]> {
+  listAttendance: async (employeeId?: number, start?: string, end?: string): Promise<AttendanceRecord[]> => {
     try {
-      const response = await api.get("/attendance/");
+      const params: { employee_id?: number; start?: string; end?: string } = {};
+      if (employeeId) {
+        params.employee_id = employeeId;
+      }
+      if (start) {
+        params.start = start;
+      }
+      if (end) {
+        params.end = end;
+      }
+      const response = await api.get("/attendance/", { params });
       const records: AttendanceRecord[] = response.data;
       return records;
     } catch (error) {
       console.error("Network error while fetching attendance records:", error);
-      return [];
+      throw error; // Re-throw to propagate the error
     }
   },
 

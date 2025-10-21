@@ -1,5 +1,6 @@
 // src/services/settings.ts
 import { settings as settingsApi } from "../api/client"; // Import the settings API object from your client
+import { api } from "../api/client"; // Import the main API instance
 
 // 1. Define a simplified interface that matches your backend model
 export interface CompanySettings {
@@ -46,4 +47,31 @@ export const settingsService = {
       return null;
     }
   },
+
+  async listHolidays(): Promise<any[]> {
+    const res = await api.get("/settings/holidays");
+    return Array.isArray(res.data) ? res.data : [];
+  },
+
+  async addHoliday(holiday: { name: string; date: string }, overridePastAttendance: boolean): Promise<any> {
+    const formData = new FormData();
+    formData.append("name", holiday.name);
+    formData.append("date", holiday.date);
+    formData.append("override_past_attendance", String(overridePastAttendance));
+
+    const res = await api.post("/settings/holidays", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  },
+
+  async deleteHoliday(id: number, revertAttendance: boolean): Promise<{ ok: boolean }> {
+    const res = await api.delete(`/settings/holidays/${id}`, { params: { revert_attendance: revertAttendance } });
+    const ok = typeof (res.data as any)?.ok === "boolean" ? (res.data as any).ok : true;
+    return { ok };
+  },
 };
+
+

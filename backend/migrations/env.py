@@ -24,11 +24,11 @@ if config.config_file_name is not None:
 # Add the project root to the Python path
 # This assumes alembic.ini is in the backend directory, and the project root is its parent
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(current_dir, "..", "..")) # Adjust as needed if structure differs
-sys.path.insert(0, project_root)
+parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
+sys.path.insert(0, parent_dir)
 
 # Correct import for your models
-from models.models import Base # Import Base from your models
+from backend.models.models import Base # Import Base from your models, adjusted path
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

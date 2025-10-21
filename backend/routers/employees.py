@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/employees", tags=["employees"])
 
 @router.post("/", response_model=EmployeeOut)
-def create_employee(payload: EmployeeCreate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: int = Depends(get_effective_user_id)):
-    logger.info(f"Effective user ID {effective_user_id} received employee creation payload: {payload.model_dump()}")
+def create_employee(payload: EmployeeCreate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: User = Depends(get_effective_user_id)):
+    logger.info(f"Effective user ID {effective_user_id.id} received employee creation payload: {payload.model_dump()}")
     try:
         emp = Employee(
             name=payload.name,
@@ -24,7 +24,8 @@ def create_employee(payload: EmployeeCreate, db: Session = Depends(get_db), curr
             bank_account=payload.bank_account, # Renamed from email
             position=payload.position,
             department=payload.department,
-            user_id=effective_user_id # Associate with the effective user
+            user_id=None, # Initially unlinked to a staff user
+            last_updated_by=current_admin_user.id # Admin who created this employee
         )
         logger.info(f"Employee object before add: monthly_salary={emp.monthly_salary}, date_of_joining={emp.date_of_joining}, bank_account={emp.bank_account}")
         db.add(emp)
@@ -40,15 +41,26 @@ def create_employee(payload: EmployeeCreate, db: Session = Depends(get_db), curr
         raise HTTPException(status_code=500, detail=f"Failed to create employee: {e}")
 
 @router.get("/", response_model=List[EmployeeOut])
-def list_employees(db: Session = Depends(get_db), effective_user_id: int = Depends(get_effective_user_id)):
-    # All users (Admin or Staff) will only see employees associated with their effective_user_id
-    return db.query(Employee).filter(Employee.user_id == effective_user_id).all()
+def list_employees(db: Session = Depends(get_db), effective_user_id: User = Depends(get_effective_user_id)):
+    if effective_user_id.is_admin():
+        # Admins see all employees they created/manage (including unlinked ones)
+        employees = db.query(Employee).filter(Employee.last_updated_by == effective_user_id.id).all()
+    else:
+        # Staff users only see their own employee record
+        employees = db.query(Employee).filter(Employee.user_id == effective_user_id.id).all()
+    
+    for emp in employees:
+        if emp.created_at is None:
+            emp.created_at = datetime.utcnow()
+        if emp.last_updated_at is None:
+            emp.last_updated_at = datetime.utcnow()
+    return employees
 
 @router.put("/{emp_id}", response_model=EmployeeOut)
-def update_employee(emp_id: int, payload: EmployeeUpdate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: int = Depends(get_effective_user_id)):
+def update_employee(emp_id: int, payload: EmployeeUpdate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: User = Depends(get_effective_user_id)):
     emp = db.get(Employee, emp_id)
     # Ensure the employee belongs to the effective user's data domain
-    if not emp or emp.user_id != effective_user_id:
+    if not emp or emp.user_id != effective_user_id.id:
         raise HTTPException(status_code=404, detail="Employee not found or not associated with your data")
     if payload.name is not None:
         emp.name = payload.name
@@ -77,17 +89,17 @@ def update_employee(emp_id: int, payload: EmployeeUpdate, db: Session = Depends(
     db.commit(); db.refresh(emp); return emp
 
 @router.delete("/{emp_id}")
-def delete_employee(emp_id: int, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: int = Depends(get_effective_user_id)):
-    logger.info(f"Effective user ID {effective_user_id} attempting to delete employee with ID: {emp_id}")
+def delete_employee(emp_id: int, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: User = Depends(get_effective_user_id)):
+    logger.info(f"Effective user ID {effective_user_id.id} attempting to delete employee with ID: {emp_id}")
     emp = db.get(Employee, emp_id)
     # Ensure the employee belongs to the effective user's data domain
-    if not emp or emp.user_id != effective_user_id:
-        logger.warning(f"Backend: Employee with ID {emp_id} not found or not associated with effective user ID {effective_user_id} for deletion.")
+    if not emp or emp.user_id != effective_user_id.id:
+        logger.warning(f"Backend: Employee with ID {emp_id} not found or not associated with effective user ID {effective_user_id.id} for deletion.")
         raise HTTPException(status_code=404, detail="Employee not found or not associated with your data")
     try:
         db.delete(emp)
         db.commit()
-        logger.info(f"Backend: Successfully deleted employee with ID: {emp.id} by effective user ID {effective_user_id}")
+        logger.info(f"Backend: Successfully deleted employee with ID: {emp.id} by effective user ID {effective_user_id.id}")
         return {"ok": True}
     except Exception as e:
         db.rollback()

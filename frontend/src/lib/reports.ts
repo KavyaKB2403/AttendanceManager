@@ -126,35 +126,22 @@ export const reportsService = {
   },
 
   // Export to CSV
-  exportToCSV(data: any[], filename: string): void {
-    if (data.length === 0) return
+  async exportCSV(month: string, employee_id?: number): Promise<Blob> {
+    const params: { month: string; employee_id?: number } = { month };
+    if (employee_id) {
+      params.employee_id = employee_id;
+    }
 
-    const headers = Object.keys(data[0])
-    const csvContent = [
-      headers.join(","),
-      ...data.map((row) =>
-        headers
-          .map((header) => {
-            const value = row[header]
-            // Escape commas and quotes in CSV
-            if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
-              return `"${value.replace(/"/g, '""')}"`
-            }
-            return value
-          })
-          .join(","),
-      ),
-    ].join("\n")
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const link = document.createElement("a")
-    const url = URL.createObjectURL(blob)
-    link.setAttribute("href", url)
-    link.setAttribute("download", `${filename}-${new Date().toISOString().split("T")[0]}.csv`)
-    link.style.visibility = "hidden"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    try {
+      const response = await api.get(`/reports/salary.csv`, {
+        params,
+        responseType: "blob", // Crucial for receiving file data
+      });
+      return response.data; // This will be the Blob
+    } catch (error) {
+      console.error("Error exporting CSV from backend:", error);
+      throw error; // Re-throw to be handled by the calling component
+    }
   },
 
   // Get available departments for filtering

@@ -15,12 +15,12 @@ load_dotenv()
 # Configure basic logging
 logging.basicConfig(level=logging.INFO) # Configure logging to show INFO level and above
 
-app = FastAPI(title="Attendance & Salary API", version="0.1.0", redirect_slashes=False)
+app = FastAPI(title=os.getenv("PROJECT_NAME", "Attendance & Salary API"), version=os.getenv("VERSION", "0.1.0"), redirect_slashes=False) # Use os.getenv values
 
 
 # Get allowed origins from an environment variable
 # Example value: "https://your-vercel-app.vercel.app,http://localhost:3000"
-allowed_origins_str = os.getenv("CORS_ORIGINS", "")
+allowed_origins_str = os.getenv("CORS_ORIGINS")
 origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin]
 print("Origins:", origins)
 # If no origins are specified in the environment, default to localhost for development

@@ -151,13 +151,21 @@ export const settings = {
 
 // ===== REPORTS (Unchanged) =====
 export const reports = {
-  async getSalaryReport(month: string): Promise<any[]> {
-    const res = await api.get("/reports/salary", { params: { month } });
+  async getSalaryReport(month: string, employee_id?: number): Promise<any[]> {
+    const params: { month: string; employee_id?: number } = { month };
+    if (employee_id) {
+      params.employee_id = employee_id;
+    }
+    const res = await api.get("/reports/salary", { params });
     return Array.isArray(res.data) ? res.data : [];
   },
-  async exportCSV(month: string): Promise<Blob> {
+  async exportCSV(month: string, employee_id?: number): Promise<Blob> {
+    const params: { month: string; employee_id?: number } = { month };
+    if (employee_id) {
+      params.employee_id = employee_id;
+    }
     const res = await api.get(`/reports/salary.csv`, {
-      params: { month },
+      params,
       responseType: "blob",
     });
     return res.data as Blob;

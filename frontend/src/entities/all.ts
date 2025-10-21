@@ -29,7 +29,6 @@ export interface ApiAttendance {
   date: string; // yyyy-MM-dd
   status: "Present" | "Absent" | "Half-day";
   manual_overtime_hours: number;
-  automatic_overtime_hours: number;
   late_hours?: number; // Added late_hours field
   employee_id: number;
   user_id: number;
@@ -75,7 +74,6 @@ export interface UiAttendance {
   status: "present" | "absent" | "half_day";
   overtime_hours: number; // maps to manual_overtime_hours
   late_hours: number; // Added late_hours field
-  holiday_overtime_auto: number; // maps to automatic_overtime_hours
   employee_id: string; // keep as string to match UiEmployee.employee_id
 }
 
@@ -154,7 +152,6 @@ function toUiAttendance(a: ApiAttendance): UiAttendance {
     status: statusFromApi[a.status],
     overtime_hours: a.manual_overtime_hours ?? 0,
     late_hours: a.late_hours ?? 0,
-    holiday_overtime_auto: a.automatic_overtime_hours ?? 0,
     employee_id: String(a.employee_id),
   };
 }
@@ -165,7 +162,6 @@ function toApiAttendance(a: Partial<UiAttendance>): Partial<ApiAttendance> {
     status: a.status ? statusToApi[a.status] : "Absent",
     manual_overtime_hours: Number(a.overtime_hours ?? 0),
     late_hours: Number(a.late_hours ?? 0), // Include late_hours from UI
-    // automatic_overtime_hours is computed by server; don't send
     employee_id: a.employee_id != null ? Number(a.employee_id) : undefined,
   };
 }
@@ -315,4 +311,5 @@ export const Reports = {
   async getSalaryReport(month: string) {
     return reportsApi.getSalaryReport(month);
   },
+  exportCSV: reportsApi.exportCSV,
 };

@@ -1,42 +1,42 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt, JWTError
-from pwdlib import PasswordHash  # 1. This is the correct import
+from pwdlib import PasswordHash
 import os
+from passlib.context import CryptContext
 
-# 2. Create the context using the correct class
-# .recommended() will use bcrypt by default if it's installed.
-pwd_context = PasswordHash.recommended()
+from models.models import User, Settings, Employee # Import Employee
+from schemas.schemas import TokenData
+import os # Import os for environment variables
+import logging
 
-# --- JWT Setup (This part is unchanged) ---
-JWT_SECRET = os.getenv("JWT_SECRET", "change_me_super_secret")
-JWT_ALG = os.getenv("JWT_ALG", "HS256")
+# Use Argon2 for password hashing
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
+logger = logging.getLogger(__name__)
 
-# --- Password Functions (These now use the correct context) ---
+# --- Password Functions ---
 def hash_password(pw: str) -> str:
     """Hashes a password using the pwd_context."""
     return pwd_context.hash(pw)
-
 
 def verify_password(pw: str, hashed: str) -> bool:
     """Verifies a password against a hash using the pwd_context."""
     return pwd_context.verify(pw, hashed)
 
-
-# --- Token Functions (This part is unchanged) ---
-def create_token(sub: str, role: Optional[str] = None, last_login_at: Optional[datetime] = None, expires_minutes: int = 60*24) -> str:
-    payload = {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=expires_minutes)}
-    if role:
-        payload["admin"] = (role == "admin")
-    if last_login_at:
-        payload["last_login_at"] = last_login_at.isoformat()
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
-
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", str(60 * 24)))) # Using os.getenv
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, os.getenv("SECRET_KEY", "super-secret-key"), algorithm=os.getenv("ALGORITHM", "HS256")) # Using os.getenv
+    return encoded_jwt
 
 def verify_token(token: str) -> Optional[str]:
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithm=os.getenv("ALGORITHM", "HS256")) # Using os.getenv
         return payload.get("sub")
     except JWTError:
         return None

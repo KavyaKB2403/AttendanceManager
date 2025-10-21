@@ -6,14 +6,43 @@ import { Label } from "components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "components/ui/table";
 import { Plus, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "components/ui/alert-dialog"; // Import AlertDialog components
+import { Switch } from "components/ui/switch"; // Import Switch
 
 export default function HolidayManager({ holidays, onAdd, onDelete, loading, theme }) {
   const [newHoliday, setNewHoliday] = useState({ name: "", date: "" });
+  // Removed: const [showOverrideDialog, setShowOverrideDialog] = useState(false); 
+  // Removed: const [showRevertDialog, setShowRevertDialog] = useState(false); 
+  // Removed: const [holidayToDelete, setHolidayToDelete] = useState(null); 
+  // Removed: const [overridePastAttendance, setOverridePastAttendance] = useState(false); 
+  // Removed: const [revertAttendanceOnDelete, setRevertAttendanceOnDelete] = useState(false); 
 
   const handleAdd = async () => {
     if (newHoliday.name && newHoliday.date) {
-      await onAdd(newHoliday);
-      setNewHoliday({ name: "", date: "" });
+      const holidayDate = new Date(newHoliday.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize today's date to compare only date part
+
+      if (holidayDate < today) {
+        // If adding a past holiday, show override dialog
+        const override = window.confirm("This holiday is in the past. Do you want to override existing attendance records for active employees on this date?\nIf confirmed, records will be marked 'Present' with 0 overtime/late hours. Records for employees who joined after this date will not be affected.");
+        await onAdd({ ...newHoliday, override_past_attendance: override });
+        setNewHoliday({ name: "", date: "" });
+      } else {
+        // For future holidays, directly add without override
+        await onAdd({ ...newHoliday, override_past_attendance: false });
+        setNewHoliday({ name: "", date: "" });
+      }
+    }
+  };
+
+  // Removed: const handleConfirmAddHoliday = async () => { ... }
+
+  const handleDeleteClick = (holidayId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this holiday? This action cannot be undone.");
+    if (confirmDelete) {
+      const confirmRevert = window.confirm("Do you want to revert automatically marked attendance for this holiday?");
+      onDelete(holidayId, confirmRevert);
     }
   };
 
@@ -57,9 +86,15 @@ export default function HolidayManager({ holidays, onAdd, onDelete, loading, the
                 <TableCell className="font-medium dark:text-white">{holiday.name}</TableCell>
                 <TableCell className="dark:text-gray-300">{format(new Date(holiday.date), "MMMM d, yyyy")}</TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon" onClick={() => onDelete(holiday.id)} className="dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700">
+                  <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => handleDeleteClick(holiday.id)} 
+                    className="dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700">
                     <Trash2 className="w-4 h-4" />
                   </Button>
+                  </AlertDialogTrigger>
                 </TableCell>
               </TableRow>
             ))}
@@ -68,6 +103,12 @@ export default function HolidayManager({ holidays, onAdd, onDelete, loading, the
         {holidays.length === 0 && (
           <p className="text-center p-8 text-slate-500 dark:text-gray-400">No holidays added yet.</p>
         )}
+
+        {/* Override Past Attendance Dialog (Removed) */}
+        {/* The AlertDialog component for overriding past attendance is now removed, using window.confirm() instead. */}
+
+        {/* Revert Attendance on Delete Dialog (Removed) */}
+        {/* The AlertDialog component for deletion is now removed, using window.confirm() instead. */}
       </div>
     </motion.div>
   );
