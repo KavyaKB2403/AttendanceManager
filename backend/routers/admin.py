@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from db import get_db
 from models.models import User, UserRole, Employee, Settings # Changed CompanySettings to Settings
 from schemas.schemas import UserOut, StaffCreatedOut, UserCreate, EmployeeOut
-from routers.auth import require_admin, hash_password, get_effective_user_id # require_admin for authz, hash_password for new users
+from routers.auth import create_access_token, require_admin, hash_password, get_effective_user_id # require_admin for authz, hash_password for new users
 from datetime import datetime, timedelta, timezone
 import secrets
 import logging
