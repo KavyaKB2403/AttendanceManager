@@ -206,7 +206,7 @@ def forgot_password(email_data: EmailSchema, db: Session = Depends(get_db)):
     db.commit()
 
     # Send email with token link
-    reset_link = f"{os.getenv("BASE_URL", "http://localhost:3000")}/reset-password?token={token}" # Using os.getenv
+    reset_link = f"{os.getenv("CORS_ORIGINS")}/reset-password?token={token}" # Using os.getenv
     sender_email = os.getenv("EMAIL_USERNAME") # Using os.getenv
     receiver_email = user.email
     password = os.getenv("EMAIL_PASSWORD") # Using os.getenv
