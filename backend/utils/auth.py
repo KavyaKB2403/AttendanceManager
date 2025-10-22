@@ -12,7 +12,7 @@ import logging
 
 # Initialize pwdlib's PasswordHash with Argon2 as the default scheme.
 # This replaces the passlib.context.CryptContext line.
-pwd_context = PasswordHash.recommended(algorithm="argon2")
+pwd_context = PasswordHash.recommended()
 
 logger = logging.getLogger(__name__)
 
