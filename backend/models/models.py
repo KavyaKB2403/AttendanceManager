@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM # <-- New Import
 class AttendanceStatus(str, enum.Enum):
     Present = "Present"
     Absent = "Absent"
-    HALF_DAY = "HALF_DAY"
+    HALF_DAY = "Half-day"
 
 class UserRole(str, enum.Enum):
     admin = "admin"
@@ -74,7 +74,14 @@ class AttendanceRecord(Base):
     # Use the SQLAlchemy generic Enum for standard operations
     # AND specify the PostgreSQL type name exactly as it exists in the database.
     status = Column(
-        ENUM(AttendanceStatus, name='attendance_status', create_type=False), # <-- Specify name and disable auto-create
+        ENUM(
+            AttendanceStatus, 
+            name='attendance_status',
+            # This callable forces SQLAlchemy to use the exact string value 
+            # (e.g., 'Half-day') for lookup, bypassing the default failing mechanism.
+            values_callable=lambda x: [e.value for e in x],
+            create_type=False
+        ),
         nullable=False
     )
     # --- END CHANGE ---
