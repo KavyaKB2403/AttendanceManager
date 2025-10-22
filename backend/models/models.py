@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM # <-- New Import
 class AttendanceStatus(str, enum.Enum):
     Present = "Present"
     Absent = "Absent"
-    HALF_DAY = "Half-day"
+    HALF_DAY = "HALF_DAY"
 
 class UserRole(str, enum.Enum):
     admin = "admin"
