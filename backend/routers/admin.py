@@ -9,15 +9,12 @@ import secrets
 import logging
 from typing import List, Optional
 from sqlalchemy import or_
-from passlib.context import CryptContext
-from utils.auth import create_access_token # Assuming create_access_token is back in utils.auth for now
+
 import os # Import os for environment variables
 import string
 import random
 
 logger = logging.getLogger(__name__)
-# Use Argon2 for password hashing
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 router = APIRouter(
     prefix="/admin",
@@ -56,7 +53,7 @@ async def create_staff(
     else:
         # Create a new user with 'staff' role
         temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
-        password_hash = pwd_context.hash(temp_password)
+        password_hash = hash_password(temp_password)
         new_staff_user = User(
             name=payload.name,
             email=payload.email,
@@ -156,7 +153,7 @@ async def reset_staff_password(
 
     # Generate a new strong, temporary password
     new_temp_password_plain = secrets.token_urlsafe(16)
-    password_hash = pwd_context.hash(new_temp_password_plain)
+    password_hash = hash_password(new_temp_password_plain)
 
     user_to_reset.password_hash = password_hash # Reverted to password_hash
     db.commit()
