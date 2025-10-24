@@ -75,10 +75,10 @@ class EmployeeOut(BaseModel):
     id: int
     user_id: Optional[int] = None # Make user_id optional as employees might not have a linked user account
     name: str
-    position: str
-    department: str
+    position: Optional[str] = None
+    department: Optional[str] = None
     monthly_salary: float
-    date_of_joining: date
+    date_of_joining: Optional[date] = None
     bank_account: Optional[str] = None
     status: Literal["active", "inactive"]
     salary_effective_from: Optional[date] = None
