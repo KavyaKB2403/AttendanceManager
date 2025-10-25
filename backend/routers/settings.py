@@ -131,7 +131,17 @@ def add_holiday(
 
 @router.get("/holidays", response_model=List[HolidayOut])
 def list_holidays(db: Session = Depends(get_db), effective_user_id: User = Depends(get_effective_user_id)):
-    return db.query(Holiday).filter(Holiday.user_id == effective_user_id.id).order_by(Holiday.date.asc()).all()
+    # Determine the user ID to use for fetching holidays
+    # If effective_user_id is staff, use the ID of the admin who created them
+    # Otherwise, use effective_user_id.id (for admins)
+    user_id_for_holidays = effective_user_id.created_by_admin_id if effective_user_id.role == "staff" else effective_user_id.id
+    
+    if not user_id_for_holidays:
+        # This case should ideally not happen if staff users are always linked to an admin
+        # but good for safety.
+        raise HTTPException(status_code=400, detail="Could not determine user for fetching holidays.")
+
+    return db.query(Holiday).filter(Holiday.user_id == user_id_for_holidays).order_by(Holiday.date.asc()).all()
 
 @router.delete("/holidays/{holiday_id}")
 def delete_holiday(
