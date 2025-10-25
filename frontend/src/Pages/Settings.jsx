@@ -137,10 +137,10 @@ export default function SettingsPage({ theme }) {
 
       <Tabs defaultValue="company" className="w-full">
         <TabsList className="grid w-full grid-cols-3 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600">
-          <TabsTrigger value="company" className="dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700"><SettingsIcon className="w-4 h-4 mr-2" />Company Settings</TabsTrigger>
-          <TabsTrigger value="holidays" className="dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700"><CalendarDays className="w-4 h-4 mr-2" />Holiday Management</TabsTrigger>
+          <TabsTrigger value="company" className="flex items-center justify-center dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700"><SettingsIcon className="w-4 h-4 mr-2" />Company Settings</TabsTrigger>
+          <TabsTrigger value="holidays" className="flex items-center justify-center dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700"><CalendarDays className="w-4 h-4 mr-2" />Holiday Management</TabsTrigger>
           {role === 'admin' && (
-            <TabsTrigger value="staff-management" className="dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700">
+            <TabsTrigger value="staff-management" className="flex items-center justify-center dark:data-[state=active]:bg-blue-700 dark:data-[state=active]:text-white dark:data-[state=active]:border-blue-700">
               <UsersRound className="w-4 h-4 mr-2" />Staff Management
             </TabsTrigger>
           )}
