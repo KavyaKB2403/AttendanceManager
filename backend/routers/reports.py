@@ -52,14 +52,22 @@ def salary_report(
 
     employees = query.filter(Employee.status == "active").all()
 
-    company_settings = db.query(Settings).filter(Settings.user_id == current_user.id).first()
+    # Determine the user ID to use for fetching company settings and holidays
+    # If current_user is staff, use the ID of the admin who created them
+    # Otherwise, use current_user.id (for admins)
+    effective_user_for_settings_holidays = current_user.created_by_admin_id if current_user.role == "staff" else current_user.id
+    
+    if not effective_user_for_settings_holidays:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not determine effective user for settings/holidays.")
+
+    company_settings = db.query(Settings).filter(Settings.user_id == effective_user_for_settings_holidays).first()
     std_hours = company_settings.standard_work_hours_per_day if company_settings else 8.0
     dates = month_dates(year, month_num)
     total_calendar_days_in_month = monthrange(year, month_num)[1]
     # Load holidays for the effective user within the month
     month_start = date(year, month_num, 1)
     month_end = date(year, month_num, total_calendar_days_in_month)
-    holiday_dates = set(h.date for h in db.query(Holiday).filter(Holiday.user_id == current_user.id, Holiday.date >= month_start, Holiday.date <= month_end).all())
+    holiday_dates = set(h.date for h in db.query(Holiday).filter(Holiday.user_id == effective_user_for_settings_holidays, Holiday.date >= month_start, Holiday.date <= month_end).all())
 
     out: List[SalaryRow] = []
     for e in employees:
