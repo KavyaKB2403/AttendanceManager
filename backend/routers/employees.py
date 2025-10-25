@@ -60,7 +60,7 @@ def list_employees(db: Session = Depends(get_db), effective_user_id: User = Depe
 def update_employee(emp_id: int, payload: EmployeeUpdate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: User = Depends(get_effective_user_id)):
     emp = db.get(Employee, emp_id)
     # Ensure the employee belongs to the effective user's data domain
-    if not emp or emp.user_id != effective_user_id.id:
+    if not emp or emp.last_updated_at != effective_user_id.id:
         raise HTTPException(status_code=404, detail="Employee not found or not associated with your data")
     if payload.name is not None:
         emp.name = payload.name
