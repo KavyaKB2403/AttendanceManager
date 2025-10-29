@@ -52,7 +52,6 @@ export default function AttendancePage({ theme }) {
         });
       }
       setAttendance(attendanceData);
-      console.log("loadData: Fetched attendanceData (after update):", attendanceData);
       
     } catch (error) {
       console.error("Error loading attendance data:", error);

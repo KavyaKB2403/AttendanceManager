@@ -29,7 +29,7 @@ async def create_staff(
     db: Session = Depends(get_db),
     current_admin_user: User = Depends(require_admin),
 ):
-    logger.info(f"Admin user {current_admin_user.email} attempting to create staff: {payload.email}")
+    # logger.info(f"Admin user {current_admin_user.email} attempting to create staff: {payload.email}")
 
     # Check if an employee with the provided employee_id exists
     employee = db.query(Employee).filter(Employee.id == payload.employee_id).first()
@@ -49,7 +49,7 @@ async def create_staff(
         if existing_user.role != "staff":
             raise HTTPException(status_code=400, detail="Existing user is not a staff member. Cannot link.")
         user_to_link = existing_user
-        logger.info(f"Linking existing staff user {existing_user.email} to employee {employee.name}")
+        # logger.info(f"Linking existing staff user {existing_user.email} to employee {employee.name}")
     else:
         # Create a new user with 'staff' role
         temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
@@ -64,7 +64,7 @@ async def create_staff(
         db.add(new_staff_user)
         db.flush() # Flush to get the new_staff_user.id
         user_to_link = new_staff_user
-        logger.info(f"Staff user {new_staff_user.email} created with ID: {new_staff_user.id}")
+        # logger.info(f"Staff user {new_staff_user.email} created with ID: {new_staff_user.id}")
 
     # Link the user to the employee
     employee.user_id = user_to_link.id
@@ -108,7 +108,7 @@ async def list_staff(
     db: Session = Depends(get_db),
     current_admin_user: User = Depends(require_admin),
 ):
-    logger.info(f"Admin user {current_admin_user.email} attempting to list staff users.")
+    # logger.info(f"Admin user {current_admin_user.email} attempting to list staff users.")
     # Filter staff by the current admin's ID or if they are linked to an employee
     staff_users = db.query(User).filter(
         User.role == UserRole.staff,
@@ -126,14 +126,14 @@ async def list_available_employees(
     db: Session = Depends(get_db),
     current_admin_user: User = Depends(require_admin), # Only admins can see available employees
 ):
-    logger.info(f"Admin user {current_admin_user.email} attempting to list available employees.")
-    logger.info(f"Filtering available employees for admin ID: {current_admin_user.id}")
+    # logger.info(f"Admin user {current_admin_user.email} attempting to list available employees.")
+    # logger.info(f"Filtering available employees for admin ID: {current_admin_user.id}")
     # Fetch employees that are not yet linked to any user account and belong to the current admin
     available_employees = db.query(Employee).filter(
         Employee.user_id == None,  # Not yet linked to a staff user
         Employee.last_updated_by == current_admin_user.id  # Created/managed by this admin
     ).all()
-    logger.info(f"Found {len(available_employees)} available employees after filtering.")
+    # logger.info(f"Found {len(available_employees)} available employees after filtering.")
     return available_employees
 
 @router.post("/staff/{user_id}/reset-password", response_model=dict)
@@ -142,7 +142,7 @@ async def reset_staff_password(
     db: Session = Depends(get_db),
     current_admin_user: User = Depends(require_admin) # Ensures only Admin can access
 ):
-    logger.info(f"Admin user {current_admin_user.email} attempting to reset password for user ID: {user_id}")
+    # logger.info(f"Admin user {current_admin_user.email} attempting to reset password for user ID: {user_id}")
 
     user_to_reset = db.get(User, user_id)
     if not user_to_reset:
@@ -159,7 +159,7 @@ async def reset_staff_password(
     db.commit()
     db.refresh(user_to_reset)
 
-    logger.info(f"Password reset for staff user ID: {user_id}. New temporary password generated.")
+    # logger.info(f"Password reset for staff user ID: {user_id}. New temporary password generated.")
 
     # Return the new plaintext temporary password (ONLY ONCE for Admin)
     return {
@@ -174,7 +174,7 @@ async def delete_staff(
     db: Session = Depends(get_db),
     current_admin_user: User = Depends(require_admin)
 ):
-    logger.info(f"Admin user {current_admin_user.email} attempting to delete user ID: {user_id}")
+    # logger.info(f"Admin user {current_admin_user.email} attempting to delete user ID: {user_id}")
 
     user_to_delete = db.get(User, user_id)
     if not user_to_delete:
@@ -197,5 +197,5 @@ async def delete_staff(
     db.delete(user_to_delete)
     db.commit()
 
-    logger.info(f"Staff user ID: {user_id} deleted successfully.")
+    # logger.info(f"Staff user ID: {user_id} deleted successfully.")
     return # FastAPI automatically handles 204 No Content for empty return

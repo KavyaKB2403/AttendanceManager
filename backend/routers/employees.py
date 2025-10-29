@@ -59,7 +59,7 @@ def list_employees(db: Session = Depends(get_db), effective_user_id: User = Depe
 @router.put("/{emp_id}", response_model=EmployeeOut)
 def update_employee(emp_id: int, payload: EmployeeUpdate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: User = Depends(get_effective_user_id)):
     emp = db.get(Employee, emp_id)
-    print(emp, emp.last_updated_by, effective_user_id.id)
+    
     # Ensure the employee belongs to the effective user's data domain
     if not emp or emp.last_updated_by != effective_user_id.id:
         raise HTTPException(status_code=404, detail="Employee not found or not associated with your data")

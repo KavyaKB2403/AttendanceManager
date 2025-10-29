@@ -111,8 +111,6 @@ const statusFromApi: Record<ApiAttendance["status"], UiAttendance["status"]> = {
 };
 
 function toUiEmployee(e: ApiEmployee): UiEmployee {
-  console.log("toUiEmployee: Received ApiEmployee:", e);
-  console.log(`toUiEmployee: monthly_salary=${e.monthly_salary}, date_of_joining=${e.date_of_joining}`);
   return {
     id: e.id,
     employee_id: String(e.id),
@@ -128,11 +126,8 @@ function toUiEmployee(e: ApiEmployee): UiEmployee {
 }
 
 function toApiEmployee(e: Partial<UiEmployee>): Partial<ApiEmployee> {
-  console.log("toApiEmployee: Received UiEmployee:", e);
   const monthly_salary_val = e.base_salary ? Number(e.base_salary) : undefined;
   const date_of_joining_val = e.hire_date || undefined;
-  console.log(`toApiEmployee: Processing base_salary=${e.base_salary}, parsed_monthly_salary=${monthly_salary_val}`);
-  console.log(`toApiEmployee: Processing hire_date=${e.hire_date}, parsed_date_of_joining=${date_of_joining_val}`);
   return {
     name: e.name ?? "",
     monthly_salary: monthly_salary_val,
@@ -217,7 +212,6 @@ export const Employees = {
     return toUiEmployee(saved);
   },
   async delete(id: number): Promise<{ ok: boolean }> {
-    console.log("Entities.Employees.delete received ID:", id);
     return employeesApi.delete(id);
   },
 };

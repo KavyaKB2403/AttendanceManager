@@ -104,7 +104,7 @@ def signup_options():
 @router.post("/signup", response_model=UserOut)
 def signup(payload: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == payload.email).first()
-    logger.info(f"Attempting to sign up with email: {payload.email}") # Add logging for debugging
+    # logger.info(f"Attempting to sign up with email: {payload.email}") # Add logging for debugging
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
     role = UserRole.admin if (payload.role or "admin") == "admin" else UserRole.staff
@@ -132,16 +132,16 @@ def signin(payload: UserLogin, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    logger.info(f"SignIn: User {user.email} (ID: {user.id}, Role: {user.role.value}) logged in.")
+    # logger.info(f"SignIn: User {user.email} (ID: {user.id}, Role: {user.role.value}) logged in.")
 
     # Determine which user's settings to fetch (admin's own or the admin who created a staff user)
     settings_user_id = user.created_by_admin_id if user.role == UserRole.staff and user.created_by_admin_id else user.id
-    logger.info(f"SignIn: Calculated settings_user_id: {settings_user_id}")
+    # logger.info(f"SignIn: Calculated settings_user_id: {settings_user_id}")
     
     # Fetch company settings for company_logo_url
     company_settings = db.query(Settings).filter(Settings.user_id == settings_user_id).first()
     company_logo_url = company_settings.company_logo_url if company_settings else None
-    logger.info(f"SignIn: Fetched company_settings: {company_settings.company_name if company_settings else 'None'} (URL: {company_logo_url})")
+    # logger.info(f"SignIn: Fetched company_settings: {company_settings.company_name if company_settings else 'None'} (URL: {company_logo_url})")
 
     # Fetch employee_id if the user is a staff member
     employee_id = None
@@ -215,13 +215,13 @@ def forgot_password(email_data: EmailSchema, db: Session = Depends(get_db)):
 
     # Validate environment variables
     if not sender_email:
-        logger.error("EMAIL_USERNAME is not set in environment variables.")
+        # logger.error("EMAIL_USERNAME is not set in environment variables.")
         raise HTTPException(status_code=500, detail="Email sender not configured.")
     if not password:
-        logger.error("EMAIL_PASSWORD is not set in environment variables.")
+        # logger.error("EMAIL_PASSWORD is not set in environment variables.")
         raise HTTPException(status_code=500, detail="Email password not configured.")
     if not smtp_server:
-        logger.error("EMAIL_SERVER is not set in environment variables.")
+        # logger.error("EMAIL_SERVER is not set in environment variables.")
         raise HTTPException(status_code=500, detail="SMTP server not configured.")
 
     msg = MIMEMultipart()
@@ -232,20 +232,20 @@ def forgot_password(email_data: EmailSchema, db: Session = Depends(get_db)):
     msg.attach(MIMEText(body, "html"))
 
     try:
-        logger.info(f"Attempting to connect to SMTP server: {smtp_server}:{smtp_port}")
-        logger.info(f"Using sender email: {sender_email}")
+        # logger.info(f"Attempting to connect to SMTP server: {smtp_server}:{smtp_port}")
+        # logger.info(f"Using sender email: {sender_email}")
         # WARNING: Do NOT log passwords in production!
-        logger.info(f"Using email password (first 3 chars): {password[:3]}...")
+        # logger.info(f"Using email password (first 3 chars): {password[:3]}...")
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.connect(smtp_server, smtp_port)
             server.ehlo()
             server.starttls()
             server.login(sender_email, password)
             server.send_message(msg) # Re-inserted the send message call
-            logger.info(f"Password reset email sent to {user.email}") # Changed print to logger.info
+            # logger.info(f"Password reset email sent to {user.email}") # Changed print to logger.info
             return {"ok": True, "message": "Password reset link sent to your email."}
     except Exception as e:
-        logger.error(f"Failed to send email to {user.email}: {e}", exc_info=True)
+        # logger.error(f"Failed to send email to {user.email}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to send password reset email.")
 
 @router.post("/reset-password")
@@ -255,20 +255,20 @@ def reset_password(payload: PasswordResetRequest, db: Session = Depends(get_db))
         .filter(and_(PasswordReset.token == payload.token, PasswordReset.used == False))
         .first()
     )
-    logger.info(f"Reset password attempt for token: {payload.token}")
-    if pr:
-        logger.info(f"PasswordReset record found: id={pr.id}, expires_at={pr.expires_at}, used={pr.used}")
-        logger.info(f"Current UTC time: {datetime.now(timezone.utc)}")
+    # logger.info(f"Reset password attempt for token: {payload.token}")
+    # if pr:
+        # logger.info(f"PasswordReset record found: id={pr.id}, expires_at={pr.expires_at}, used={pr.used}")
+        # logger.info(f"Current UTC time: {datetime.now(timezone.utc)}")
 
     if not pr or pr.expires_at < datetime.now(timezone.utc):
-        logger.warning(f"Invalid or expired token for payload.token={payload.token}. PR found: {pr is not None}. Expired: {pr and pr.expires_at < datetime.now(timezone.utc)}")
+        # logger.warning(f"Invalid or expired token for payload.token={payload.token}. PR found: {pr is not None}. Expired: {pr and pr.expires_at < datetime.now(timezone.utc)}")
         raise HTTPException(status_code=400, detail="Invalid or expired token")
     user = db.get(User, pr.user_id)
     if not user:
-        logger.warning(f"User not found for pr.user_id={pr.user_id}")
+        # logger.warning(f"User not found for pr.user_id={pr.user_id}")
         raise HTTPException(status_code=400, detail="User not found")
     user.password_hash = hash_password(payload.new_password)
     pr.used = True
     db.commit()
-    logger.info(f"Password successfully reset for user ID: {user.id}")
+    # logger.info(f"Password successfully reset for user ID: {user.id}")
     return {"ok": True}

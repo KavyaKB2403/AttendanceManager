@@ -21,9 +21,9 @@ cloudinary.config(
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
-print(cloudinary.config().cloud_name)
-print(cloudinary.config().api_key)
-print(cloudinary.config().api_secret)
+# print(cloudinary.config().cloud_name)
+# print(cloudinary.config().api_key)
+# print(cloudinary.config().api_secret)
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 logger = logging.getLogger(__name__)

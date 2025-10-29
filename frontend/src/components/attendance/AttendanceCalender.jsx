@@ -11,7 +11,6 @@ export default function AttendanceCalendar({
   employees,
   selectedEmployee
 }) {
-  console.log("AttendanceCalendar: received attendance prop:", attendance);
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -19,27 +18,19 @@ export default function AttendanceCalendar({
 
   const getDayAnalytics = (day) => {
     const dateStr = format(day, "yyyy-MM-dd");
-    console.log(`Calendar: Getting analytics for ${dateStr}. Selected employee:`, selectedEmployee);
     if (employees.length === 0) return { present: 0, total: 0, isIndividual: !!selectedEmployee };
     if (selectedEmployee) {
       const empAttendance = attendance.find(a => {
         const match = a.date === dateStr && String(a.employee_id) === String(selectedEmployee.id);
-        if (match) {
-          console.log(`Calendar: Matched individual attendance for ${dateStr}, emp ${selectedEmployee.id}:`, a);
-        }
         return match;
       });
       return { status: empAttendance?.status || null, isIndividual: true };
     } else {
       const dayAttendance = attendance.filter(a => {
         const match = a.date === dateStr;
-        if (match) {
-          console.log(`Calendar: Matched daily attendance for ${dateStr}:`, a);
-        }
         return match;
       });
       const presentCount = dayAttendance.filter(a => a.status === "present" || a.status === "half_day").length; // Changed to lowercase
-      console.log(`Calendar: Daily analytics for ${dateStr}: Present: ${presentCount}/${employees.length}`);
       return { present: presentCount, total: employees.length, isIndividual: false };
     }
   };

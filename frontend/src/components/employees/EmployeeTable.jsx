@@ -25,11 +25,9 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const handleDelete = async (employeeId) => {
-    console.log("Frontend: Attempting to delete employee with ID:", employeeId);
     if (window.confirm("Are you sure you want to delete this employee? This action cannot be undone.")) {
       try {
         await Employees.delete(employeeId);
-        console.log("Frontend: Employee deleted successfully. Refreshing list.");
         await onEmployeeUpdate();
       } catch (error) {
         console.error("Frontend: Error deleting employee:", error);

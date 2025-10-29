@@ -36,7 +36,7 @@ def upsert_attendance(payload: AttendanceCreate, db: Session = Depends(get_db), 
     if not employee or employee.status == "inactive":
         raise HTTPException(status_code=400, detail="Cannot mark attendance for inactive employee or employee not associated with your account")
 
-    logger.info(f"Effective user ID {effective_user_id.id} received attendance payload: {payload.model_dump()}")
+    # logger.info(f"Effective user ID {effective_user_id.id} received attendance payload: {payload.model_dump()}")
 
     auto_ot = 0.0
     # Check if the date is a holiday
@@ -65,11 +65,11 @@ def upsert_attendance(payload: AttendanceCreate, db: Session = Depends(get_db), 
     try:
         db.commit()
         db.refresh(rec)
-        logger.info(f"Successfully upserted attendance record for employee {payload.employee_id} on {payload.date} by effective user ID {effective_user_id.id}")
+        # logger.info(f"Successfully upserted attendance record for employee {payload.employee_id} on {payload.date} by effective user ID {effective_user_id.id}")
         return rec
     except Exception as e:
         db.rollback()
-        logger.error(f"Failed to upsert attendance record: {e}", exc_info=True)
+        # logger.error(f"Failed to upsert attendance record: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to save attendance record")
 
 @router.get("/", response_model=List[AttendanceOut])

@@ -54,7 +54,6 @@ export default function AddEmployeeDialog({ open, onClose, onSubmit, theme }) {
   };
 
   const toApiEmployee = (uiEmployee) => {
-      console.log("toApiEmployee: Received UiEmployee:", uiEmployee);
       return {
           name: uiEmployee.name,
           base_salary: uiEmployee.base_salary ? parseFloat(uiEmployee.base_salary) : undefined,
