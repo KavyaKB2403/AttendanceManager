@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles # Import StaticFiles
 from db import Base, engine
 # import models so SQLAlchemy sees them (models define Base subclasses)
 from models import models  # noqa: F401
-from routers import auth, employees, attendance, settings as settings_router, reports, admin # Import admin router
+from routers import auth, employees, attendance, settings as settings_router, reports, admin, healthcheck # Import admin router
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -48,7 +48,8 @@ app.include_router(employees.router)
 app.include_router(attendance.router)
 app.include_router(settings_router.router)
 app.include_router(reports.router)
-app.include_router(admin.router) # Include the new admin router
+app.include_router(admin.router)
+app.include_router(healthcheck.router) # Include the new admin router
 
 @app.get("/")
 def root():
