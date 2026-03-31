@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from 'components/ui/button';
-import { LogOut, User as UserIcon, Building, Mail, Clock, Edit, PlusCircle, CalendarDays } from 'lucide-react';
+import { LogOut, Building, Mail, Clock, Edit, PlusCircle, CalendarDays } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext'; // Import useAuth to get company name from settings
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
@@ -16,7 +16,7 @@ const getCompanyInitials = (name) => {
 export default function ProfileCard({ user, companyLogoUrl, onSignOut, onClose, companyName }) {
   const { lastLoginAt } = useAuth(); // Get lastLoginAt directly from AuthContext
   const navigate = useNavigate(); // Initialize useNavigate
-  const lastLogin = "N/A"; // Placeholder for now
+
 
   const handleQuickLinkClick = (path) => {
     onClose(); // Close the profile card

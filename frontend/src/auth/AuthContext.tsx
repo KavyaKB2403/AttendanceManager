@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import { settingsService } from "../lib/settings"; // Import settingsService
 
 interface User {
   id: number;

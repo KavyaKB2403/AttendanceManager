@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { CompanySettings, Reports } from "entities/all";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format } from "date-fns";
 import { motion } from "framer-motion";
 import ReportFilters from "../components/reports/ReportFilters";
 import SalaryReportTable from "../components/reports/SalaryReportTable";
