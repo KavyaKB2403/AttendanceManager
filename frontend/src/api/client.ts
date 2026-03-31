@@ -171,3 +171,19 @@ export const reports = {
     return res.data as Blob;
   },
 };
+
+// ===== ADVANCES =====
+export const advances = {
+  async getByEmployee(employeeId: number): Promise<any[]> {
+    const res = await api.get(`/employees/${employeeId}/advances`);
+    return Array.isArray(res.data) ? res.data : [];
+  },
+  async create(employeeId: number, data: { amount: number; date: string; reason?: string }): Promise<any> {
+    const res = await api.post(`/employees/${employeeId}/advances`, data);
+    return res.data;
+  },
+  async delete(employeeId: number, advanceId: number): Promise<{ ok: boolean }> {
+    const res = await api.delete(`/employees/${employeeId}/advances/${advanceId}`);
+    return res.data;
+  }
+};

@@ -5,6 +5,7 @@ import {
   settings as settingsApi,
   reports as reportsApi,
   auth as authApi,
+  advances as advancesApi,
 } from "api/client";
 
 // --------------------
@@ -52,6 +53,14 @@ export interface ApiSettings {
   company_logo_url?: string; // Added for company logo
 }
 
+export interface ApiAdvance {
+  id: number;
+  employee_id: number;
+  amount: number;
+  date: string;
+  reason?: string;
+}
+
 // --------------------
 // UI (Front-end) shapes
 // --------------------
@@ -93,6 +102,14 @@ export interface UiCompanySettings {
   standard_work_hours: number;
   // keep raw server payload if needed
   __server?: ApiSettings;
+}
+
+export interface UiAdvance {
+  id: number;
+  employee_id: number;
+  amount: number;
+  date: string;
+  reason?: string;
 }
 
 // --------------------
@@ -280,6 +297,20 @@ export const CompanySettings = {
     const body = toApiSettings(payload);
     return settingsApi.update(body);
   },
+};
+
+// Advances
+export const Advances = {
+  async getByEmployee(employeeId: number): Promise<UiAdvance[]> {
+    const list: ApiAdvance[] = await advancesApi.getByEmployee(employeeId);
+    return list; // Assuming direct mapping for now
+  },
+  async create(employeeId: number, data: { amount: number; date: string; reason?: string }): Promise<UiAdvance> {
+    return advancesApi.create(employeeId, data);
+  },
+  async delete(employeeId: number, advanceId: number): Promise<{ ok: boolean }> {
+    return advancesApi.delete(employeeId, advanceId);
+  }
 };
 
 // Auth passthrough

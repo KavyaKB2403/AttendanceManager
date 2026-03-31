@@ -28,6 +28,7 @@ export default function SalaryReportTable({ data, loading, currency, theme }) {
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Regular Hours</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Overtime</TableHead>
               <TableHead className="font-semibold text-slate-700 dark:text-gray-200 dark:bg-gray-900">Late Hours</TableHead>
+              <TableHead className="font-semibold text-rose-600 dark:text-rose-400 dark:bg-gray-900">Advances</TableHead>
               <TableHead className="text-right font-bold text-blue-600 dark:text-blue-400 dark:bg-gray-900">Total Payable Salary</TableHead>
             </TableRow>
           </TableHeader>
@@ -50,6 +51,7 @@ export default function SalaryReportTable({ data, loading, currency, theme }) {
                 <TableCell>{(row.total_hours_worked - row.total_overtime_hours + row.total_late_hours).toFixed(2)}h</TableCell>
                 <TableCell>{row.total_overtime_hours.toFixed(2)}h</TableCell>
                 <TableCell>{row.total_late_hours.toFixed(2)}h</TableCell>
+                <TableCell className="text-rose-600 dark:text-rose-400">-{currency}{(row.advance_deduction || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                 <TableCell className="text-right font-bold text-lg text-emerald-600 dark:text-emerald-400">
                   {currency}{row.total_payable_salary.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </TableCell>

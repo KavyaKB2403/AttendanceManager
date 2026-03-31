@@ -97,6 +97,7 @@ def delete_employee(emp_id: int, db: Session = Depends(get_db), current_admin_us
     if not emp or emp.user_id != effective_user_id.id:
         logger.warning(f"Backend: Employee with ID {emp_id} not found or not associated with effective user ID {effective_user_id.id} for deletion.")
         raise HTTPException(status_code=404, detail="Employee not found or not associated with your data")
+# ... existing delete_employee endpoint ...
     try:
         db.delete(emp)
         db.commit()
@@ -106,3 +107,48 @@ def delete_employee(emp_id: int, db: Session = Depends(get_db), current_admin_us
         db.rollback()
         logger.error(f"Backend: Failed to delete employee with ID {emp_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to delete employee: {e}")
+
+from models.models import AdvanceSalary
+from schemas.schemas import AdvanceSalaryCreate, AdvanceSalaryOut
+
+@router.post("/{emp_id}/advances", response_model=AdvanceSalaryOut)
+def create_advance_salary(emp_id: int, payload: AdvanceSalaryCreate, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: User = Depends(get_effective_user_id)):
+    emp = db.get(Employee, emp_id)
+    if not emp or emp.last_updated_by != effective_user_id.id:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    adv = AdvanceSalary(employee_id=emp_id, amount=payload.amount, date=payload.date, reason=payload.reason)
+    db.add(adv)
+    db.commit()
+    db.refresh(adv)
+    return adv
+
+@router.get("/{emp_id}/advances", response_model=List[AdvanceSalaryOut])
+def get_advance_salaries(emp_id: int, db: Session = Depends(get_db), effective_user_id: User = Depends(get_effective_user_id)):
+    emp = db.get(Employee, emp_id)
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    if effective_user_id.is_admin():
+        if emp.last_updated_by != effective_user_id.id:
+            raise HTTPException(status_code=403, detail="Not authorized")
+    else:
+        # Check if staff is viewing their own employee record
+        # Note: Depending on data model, user_id might link employee to staff user
+        staff_emp = db.query(Employee).filter(Employee.user_id == effective_user_id.id).first()
+        if not staff_emp or staff_emp.id != emp_id:
+            raise HTTPException(status_code=403, detail="Not authorized")
+    
+    advances = db.query(AdvanceSalary).filter(AdvanceSalary.employee_id == emp_id).order_by(AdvanceSalary.date.desc()).all()
+    return advances
+
+@router.delete("/{emp_id}/advances/{adv_id}")
+def delete_advance_salary(emp_id: int, adv_id: int, db: Session = Depends(get_db), current_admin_user: User = Depends(require_admin), effective_user_id: User = Depends(get_effective_user_id)):
+    emp = db.get(Employee, emp_id)
+    if not emp or emp.last_updated_by != effective_user_id.id:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    adv = db.get(AdvanceSalary, adv_id)
+    if not adv or adv.employee_id != emp_id:
+        raise HTTPException(status_code=404, detail="Advance not found")
+    
+    db.delete(adv)
+    db.commit()
+    return {"ok": True}

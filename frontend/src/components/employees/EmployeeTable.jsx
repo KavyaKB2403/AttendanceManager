@@ -12,17 +12,19 @@ import {
 } from "components/ui/table";
 import { Badge } from "components/ui/badge";
 import { Button } from "components/ui/button";
-import { Landmark, CreditCard, Calendar, IndianRupee, Trash2, PencilLine, History } from "lucide-react";
+import { Landmark, CreditCard, Calendar, IndianRupee, Trash2, PencilLine, History, Banknote } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "components/ui/dialog";
 import { Input } from "components/ui/input";
 import { Label } from "components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "components/ui/select";
+import ManageAdvancesDialog from "./ManageAdvancesDialog";
 
 export default function EmployeeTable({ employees, loading, onEmployeeUpdate, theme }) {
   // const [deletingId, setDeletingId] = useState(null);
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", position: "", department: "", bank_account: "", base_salary: 0, status: "active", salary_effective_from: "" });
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [advancesEmployee, setAdvancesEmployee] = useState(null);
 
   const handleDelete = async (employeeId) => {
     if (window.confirm("Are you sure you want to delete this employee? This action cannot be undone.")) {
@@ -181,6 +183,14 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
                 <TableCell>
                   <div className="flex gap-1">
                     <Button 
+                      title="Manage Advances"
+                      variant="ghost" size="icon"
+                      className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-200 dark:hover:bg-gray-700"
+                      onClick={() => setAdvancesEmployee(employee)}
+                    >
+                      <Banknote className="w-4 h-4" />
+                    </Button>
+                    <Button 
                       variant="ghost" size="icon"
                       className="text-slate-600 hover:text-slate-800 hover:bg-slate-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
                       onClick={() => openEdit(employee)}
@@ -256,6 +266,13 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <ManageAdvancesDialog 
+        open={!!advancesEmployee} 
+        onClose={() => setAdvancesEmployee(null)} 
+        employee={advancesEmployee} 
+        theme={theme} 
+      />
     </div>
   );
 }

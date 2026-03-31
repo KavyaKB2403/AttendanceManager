@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta
 from calendar import monthrange
 from db import get_db
-from models.models import Employee, AttendanceRecord, Settings, Holiday, User # Changed CompanySettings to Settings
+from models.models import Employee, AttendanceRecord, Settings, Holiday, User, AdvanceSalary # Added AdvanceSalary
 from schemas.schemas import SalaryRow
 from routers.auth import get_current_user, get_effective_user_id # Import get_effective_user_id
 from typing import List, Optional
@@ -103,12 +103,23 @@ def salary_report(
         regular_hours = (normal_present_days * std_hours) + (half_days * (std_hours / 2.0)) + (paid_holiday_days * std_hours)
         total_hours_worked = regular_hours + total_ot - total_late # Deduct late hours
         total_payable = hourly_rate * total_hours_worked
+        
+        advances = db.query(AdvanceSalary).filter(
+            AdvanceSalary.employee_id == e.id,
+            AdvanceSalary.date >= first_day_of_month,
+            AdvanceSalary.date <= last_day_of_month
+        ).all()
+        advance_deduction = sum(adv.amount for adv in advances)
+        total_payable -= advance_deduction
+
         out.append(SalaryRow(
             employee_id=e.id, name=e.name, base_monthly_salary=e.monthly_salary,
             days_present=normal_present_days, half_days=half_days, # Use normal_present_days
             work_days=round(work_days,2), paid_holiday_days=round(paid_holiday_days,2), total_paid_days=round(total_paid_days,2),
             total_overtime_hours=round(total_ot,2), total_late_hours=round(total_late,2), hourly_rate=round(hourly_rate,2),
-            total_hours_worked=round(total_hours_worked,2), total_payable_salary=round(total_payable,2),
+            total_hours_worked=round(total_hours_worked,2), 
+            advance_deduction=round(advance_deduction, 2),
+            total_payable_salary=round(total_payable,2),
         ))
     return out
 
@@ -122,8 +133,8 @@ def salary_report_csv(
     data = salary_report(month, employee_id, db, current_user) # Pass employee_id and current_user
     output = StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Employee ID","Name","Base Monthly Salary","Days Present","Half Days","Work Days","Paid Holidays","Total Paid Days","Total OT (h)","Total Late (h)","Hourly Rate","Total Hours Worked","Total Payable Salary"])
+    writer.writerow(["Employee ID","Name","Base Monthly Salary","Days Present","Half Days","Work Days","Paid Holidays","Total Paid Days","Total OT (h)","Total Late (h)","Hourly Rate","Total Hours Worked","Advances Deducted","Total Payable Salary"])
     for row in data:
-        writer.writerow([row.employee_id, row.name, row.base_monthly_salary, row.days_present, row.half_days, row.work_days, row.paid_holiday_days, row.total_paid_days, row.total_overtime_hours, row.total_late_hours, row.hourly_rate, row.total_hours_worked, row.total_payable_salary])
+        writer.writerow([row.employee_id, row.name, row.base_monthly_salary, row.days_present, row.half_days, row.work_days, row.paid_holiday_days, row.total_paid_days, row.total_overtime_hours, row.total_late_hours, row.hourly_rate, row.total_hours_worked, row.advance_deduction, row.total_payable_salary])
     csv_bytes = output.getvalue().encode("utf-8")
     return Response(content=csv_bytes, media_type="text/csv", headers={"Content-Disposition": f"attachment; filename=salary_{month}.csv"})

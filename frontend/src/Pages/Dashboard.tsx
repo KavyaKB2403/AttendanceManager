@@ -6,7 +6,8 @@ import { TrendingUp, TrendingDown, Users, Calendar, Clock, Eye, EyeOff, IndianRu
 import { motion } from "framer-motion";
 import { Switch } from "components/ui/switch";
 import { Label } from "components/ui/label";
-
+import { useAuth } from "../auth/AuthContext";
+import { Advances } from "../entities/all";
 import StatsCard from "components/dashboard/StatsCard.jsx";
 import AttendanceChart from "components/dashboard/AttendanceChart";
 import RecentAttendance from "components/dashboard/RecentAttendance.jsx";
@@ -17,6 +18,9 @@ interface DashboardProps {
   theme: 'light' | 'dark';
 }
 export default function Dashboard({ onSignOut, theme }: DashboardProps) {
+  const { user } = useAuth();
+  const [myAdvances, setMyAdvances] = useState<any[]>([]);
+
   // ✅ renamed state variables to avoid collision with API clients
   const [employeeList, setEmployeeList] = useState<Employee[]>([]);
   const [attendanceList, setAttendanceList] = useState<Attendance[]>([]);
@@ -62,6 +66,12 @@ export default function Dashboard({ onSignOut, theme }: DashboardProps) {
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
+
+  useEffect(() => {
+    if (user?.role === "staff" && user?.employee_id) {
+       Advances.getByEmployee(user.employee_id).then(setMyAdvances).catch(console.error);
+    }
+  }, [user]);
 
   const calculateStats = (employeesFetched: Employee[], attendanceFetched: Attendance[]) => {
     const today = format(new Date(), "yyyy-MM-dd");
@@ -221,6 +231,29 @@ export default function Dashboard({ onSignOut, theme }: DashboardProps) {
       {/* Recent Activity */}
       {chartToggles.showRecentActivity && (
         <RecentAttendance attendanceData={attendanceList} employees={employeeList} />
+      )}
+
+      {/* Staff Salary Advances */}
+      {user?.role === "staff" && myAdvances.length > 0 && (
+         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 dark:bg-gray-800 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4 dark:text-white flex items-center gap-2"><IndianRupee className="w-5 h-5 text-rose-500"/> Your Salary Advances</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600 dark:text-gray-300">
+                <thead className="bg-slate-50 dark:bg-gray-900 font-semibold text-slate-700 dark:text-gray-200">
+                   <tr><th className="p-3 rounded-l-lg">Date (Deducted In)</th><th className="p-3">Amount</th><th className="p-3 rounded-r-lg">Reason</th></tr>
+                </thead>
+                <tbody>
+                   {myAdvances.map(adv => (
+                     <tr key={adv.id} className="border-b last:border-0 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700 transition">
+                        <td className="p-3">{adv.date}</td>
+                        <td className="p-3 font-medium text-rose-600 dark:text-rose-400">-{settingsData?.currency || "₹"}{adv.amount}</td>
+                        <td className="p-3">{adv.reason || "-"}</td>
+                     </tr>
+                   ))}
+                </tbody>
+              </table>
+            </div>
+         </motion.div>
       )}
 
       {/* Info when all charts are hidden */}

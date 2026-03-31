@@ -21,7 +21,7 @@ class User(Base):
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False) # Changed from hashed_password
-    role = Column(ENUM(UserRole), default=UserRole.staff, nullable=False) # Use UserRole Enum and default to staff
+    role = Column(ENUM(UserRole, name='user_role', create_type=False), default=UserRole.staff, nullable=False) # Use UserRole Enum and default to staff
     created_at = Column(DateTime, default=datetime.utcnow)
     last_login_at = Column(DateTime, nullable=True) # Last login timestamp
     created_by_admin_id = Column(Integer, ForeignKey("users.id"), nullable=True) # For staff, links to admin who created them
@@ -124,3 +124,14 @@ class PasswordReset(Base):
     expires_at = Column(DateTime, nullable=False)
     used = Column(Boolean, default=False, nullable=False)
     user = relationship("User", back_populates="password_resets")
+
+class AdvanceSalary(Base):
+    __tablename__ = "advance_salaries"
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    amount = Column(Float, nullable=False)
+    date = Column(Date, index=True, nullable=False)
+    reason = Column(String(255), nullable=True)
+    
+    employee = relationship("Employee", backref="advances")
+

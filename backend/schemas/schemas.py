@@ -137,6 +137,22 @@ class SettingsOut(SettingsIn):
 class CompanyLogoUpload(BaseModel):
     file: UploadFile
 
+# Advance Salary
+class AdvanceSalaryCreate(BaseModel):
+    amount: float
+    date: date
+    reason: Optional[str] = None
+
+class AdvanceSalaryOut(BaseModel):
+    id: int
+    employee_id: int
+    amount: float
+    date: date
+    reason: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
 # Reports
 class SalaryRow(BaseModel):
     employee_id: int
@@ -151,4 +167,5 @@ class SalaryRow(BaseModel):
     total_late_hours: float # Added total_late_hours field
     hourly_rate: float
     total_hours_worked: float
+    advance_deduction: float = 0.0 # Added advance_deduction field
     total_payable_salary: float
