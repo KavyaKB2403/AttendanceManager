@@ -12,11 +12,8 @@ import { Input } from "components/ui/input";
 import { Label } from "components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "components/ui/select";
 import { toast } from "sonner";
-import { User, Mail } from "lucide-react";
 import { adminService } from "api/admin"; // Import adminService
 import { employeeService } from "lib/employees"; // Assuming an employee service exists or will be created
-import { Alert, AlertDescription, AlertTitle } from "components/ui/alert";
-import { CheckCircle2 } from "lucide-react";
 
 
 export default function AddStaffDialog({ open, onClose, onStaffAdded }) {

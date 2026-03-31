@@ -23,7 +23,6 @@ export default function EmployeeTable({ employees, loading, onEmployeeUpdate, th
   // const [deletingId, setDeletingId] = useState(null);
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", position: "", department: "", bank_account: "", base_salary: 0, status: "active", salary_effective_from: "" });
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [advancesEmployee, setAdvancesEmployee] = useState(null);
 
   const handleDelete = async (employeeId) => {

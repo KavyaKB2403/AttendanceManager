@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -27,6 +27,7 @@ export default function ManageAdvancesDialog({ open, onClose, employee, theme })
     if (open && employee) {
       loadAdvances();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, employee]);
 
   const loadAdvances = async () => {
