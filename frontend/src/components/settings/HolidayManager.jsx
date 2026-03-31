@@ -6,8 +6,7 @@ import { Label } from "components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "components/ui/table";
 import { Plus, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "components/ui/alert-dialog"; // Import AlertDialog components
-import { Switch } from "components/ui/switch"; // Import Switch
+// Removed AlertDialog and Switch imports since they are no longer used
 
 export default function HolidayManager({ holidays, onAdd, onDelete, loading, theme }) {
   const [newHoliday, setNewHoliday] = useState({ name: "", date: "" });
@@ -86,7 +85,6 @@ export default function HolidayManager({ holidays, onAdd, onDelete, loading, the
                 <TableCell className="font-medium dark:text-white">{holiday.name}</TableCell>
                 <TableCell className="dark:text-gray-300">{format(new Date(holiday.date), "MMMM d, yyyy")}</TableCell>
                 <TableCell>
-                  <AlertDialogTrigger asChild>
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -94,7 +92,6 @@ export default function HolidayManager({ holidays, onAdd, onDelete, loading, the
                     className="dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-gray-700">
                     <Trash2 className="w-4 h-4" />
                   </Button>
-                  </AlertDialogTrigger>
                 </TableCell>
               </TableRow>
             ))}

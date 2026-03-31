@@ -16,8 +16,8 @@ export function Alert({ className = "", variant = "default", ...props }: AlertPr
   return <div className={clsx("w-full rounded border p-3 text-sm", variants[variant], className)} {...props} />;
 }
 
-export function AlertTitle(props: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h5 className="mb-1 font-medium leading-none tracking-tight" {...props} />;
+export function AlertTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return <h5 className={clsx("mb-1 font-medium leading-none tracking-tight", className)} {...props}>{children}</h5>;
 }
 
 export function AlertDescription(props: React.HTMLAttributes<HTMLParagraphElement>) {

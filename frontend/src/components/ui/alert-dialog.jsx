@@ -1,5 +1,5 @@
 // src/components/ui/alert-dialog.jsx
-import React, { useState } from "react";
+import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./dialog";
 import { Button } from "./button";
 
