@@ -19,7 +19,7 @@ import Reports from "Pages/Reports.jsx";
 import Settings from "Pages/Settings.jsx";
 
 function AppContent() { // Renamed App to AppContent
-  const { isAuthenticated, signIn, signOut } = useAuth(); // Use auth context
+  const { isAuthenticated, signOut } = useAuth(); // Use auth context
 
   const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('theme');
