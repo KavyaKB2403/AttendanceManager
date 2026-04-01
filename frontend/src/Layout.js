@@ -11,10 +11,10 @@ import {
   Settings,
   Menu,
   X,
-  LogOut,
+  //LogOut,
   Sun,
   Moon,
-  UserRound, // Changed from UsersRound to UserRound for individual profile
+  //UserRound, // Changed from UsersRound to UserRound for individual profile
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { motion } from "framer-motion";
@@ -74,7 +74,7 @@ export default function Layout({ children, currentPageName, onSignOut, theme, to
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-black">
       <HelmetProvider>
-      <Helmet>
+        <Helmet>
           <title>{currentPageName ? `${currentPageName} | AttendanceManager` : "AttendanceManager"}</title>
         </Helmet>
       </HelmetProvider>
@@ -101,11 +101,10 @@ export default function Layout({ children, currentPageName, onSignOut, theme, to
                 <Link
                   key={item.title}
                   to={item.url}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium ${
-                    location.pathname === item.url
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium ${location.pathname === item.url
                       ? "bg-blue-600 text-white shadow-lg"
                       : "text-slate-600 hover:text-blue-600 hover:bg-blue-50"
-                  }`}
+                    }`}
                 >
                   <item.icon className="w-4 h-4" />
                   {item.title}
@@ -138,13 +137,13 @@ export default function Layout({ children, currentPageName, onSignOut, theme, to
 
             {/* Profile Card */}
             {profileCardOpen && user && (
-                <ProfileCard
-                    user={user}
-                    companyLogoUrl={companyLogoUrl}
-                    onSignOut={onSignOut}
-                    onClose={() => setProfileCardOpen(false)}
-                    companyName={companyName} // Pass companyName to ProfileCard
-                />
+              <ProfileCard
+                user={user}
+                companyLogoUrl={companyLogoUrl}
+                onSignOut={onSignOut}
+                onClose={() => setProfileCardOpen(false)}
+                companyName={companyName} // Pass companyName to ProfileCard
+              />
             )}
 
             {/* Mobile menu button */}
@@ -175,11 +174,10 @@ export default function Layout({ children, currentPageName, onSignOut, theme, to
                 <Link
                   key={item.title}
                   to={item.url}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
-                    location.pathname === item.url
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${location.pathname === item.url
                       ? "bg-blue-600 text-white"
                       : "text-slate-600 hover:text-blue-600 hover:bg-blue-50"
-                  }`}
+                    }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <item.icon className="w-5 h-5" />

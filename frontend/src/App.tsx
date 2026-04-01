@@ -20,7 +20,7 @@ import Settings from "Pages/Settings.jsx";
 
 function AppContent() { // Renamed App to AppContent
   const { isAuthenticated, signIn, signOut } = useAuth(); // Use auth context
-  
+
   const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches))
@@ -52,9 +52,9 @@ function AppContent() { // Renamed App to AppContent
     );
   };
 
-  const handleSignedIn = (token: string) => {
-    signIn(token);
-  };
+  // const handleSignedIn = (token: string) => {
+  //   signIn(token);
+  // };
 
   const handleSignOut = () => {
     signOut();
